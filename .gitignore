@@ -1,0 +1,30 @@
+/temp/
+
+# Maven and Java build output
+/target/
+*.class
+*.war
+*.jar
+!/.mvn/wrapper/maven-wrapper.jar
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+application-local.properties
+*.local.properties
+
+# Uploaded files and runtime output
+/uploads/
+/logs/
+*.log
+
+# IDE and operating system files
+.idea/
+*.iml
+.project
+.classpath
+.settings/
+.vscode/
+.DS_Store
+Thumbs.db
