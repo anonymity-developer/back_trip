@@ -2,7 +2,7 @@
 
 ## 기술 구성과 책임
 
-Java 21, Maven WAR, Tomcat 10.1, Jakarta Servlet/JSP, JSTL, JDBC, MySQL 8을 사용한다. 화면은 서버 렌더링 JSP를 기본으로 하고 지도·드래그앤드롭·부가 정보만 JavaScript로 비동기 처리한다. `src/main/java`는 `controller`, `service`, `dao`, `dto`, `external`, `filter`, `config` 등 책임별 패키지로 구성한다. JSP는 `WEB-INF/views`에 두어 Servlet을 거치지 않는 직접 접근을 막는다.
+Java 21, Maven WAR, Tomcat 11, Jakarta Servlet/JSP, JSTL, JDBC, MySQL 8을 사용한다. 화면은 서버 렌더링 JSP를 기본으로 하고 지도·드래그앤드롭·부가 정보만 JavaScript로 비동기 처리한다. `src/main/java`는 `controller`, `service`, `dao`, `dto`, `external`, `filter`, `config` 등 책임별 패키지로 구성한다. JSP는 `WEB-INF/views`에 두어 Servlet을 거치지 않는 직접 접근을 막는다.
 
 ```mermaid
 flowchart LR
@@ -21,9 +21,9 @@ flowchart LR
 | Service | 입력·권한 검증, 업무 규칙, 트랜잭션 경계, 외부 데이터와 DB 조합 |
 | Dao | PreparedStatement 기반 SQL과 결과 매핑. 화면·세션 로직을 두지 않음 |
 | Dto | 화면·계층 간 전달 데이터. 원본 API 응답 객체와 분리 |
-| 외부 API 클라이언트 | 인증 키 적용, 타임아웃·응답 파싱·오류 변환. 키를 브라우저에 노출하지 않음. 단, Kakao JavaScript 키는 브라우저 사용 키로 관리 |
+| 외부 API 클라이언트 | 인증 키 적용, 타임아웃·응답 파싱·오류 변환. 서버용 키를 브라우저에 노출하지 않음 |
 
-DB 연결은 DataSource 연결 풀을 사용하고, 다중 테이블 변경(여행 순서·회원 탈퇴 등)은 Service에서 한 트랜잭션으로 처리한다. HTTP 요청 본문은 UTF-8로 처리한다.
+DB 연결은 Tomcat JNDI `jdbc/EnjoyTrip` DataSource가 설정되면 이를 사용하고, 없으면 환경 변수로 MySQL JDBC에 직접 연결한다. 여행 순서와 비밀번호 초기화의 다중 테이블 변경은 한 트랜잭션으로 처리한다. HTTP 요청 본문과 JSP 출력은 UTF-8로 처리한다.
 
 ## 주요 화면과 요청
 
@@ -38,6 +38,7 @@ DB 연결은 DataSource 연결 풀을 사용하고, 다중 테이블 변경(여�
 | 뉴스 | 저장된 관광 뉴스 목록 | `GET /news` |
 | 공지·게시판 | 목록·상세·작성·수정·삭제 | `GET /notices`, `/posts` 및 각 `{id}`; 생성·수정·삭제는 대응 `POST` |
 | 관리자 | 동기화, 초기화 요청 처리 | `GET /admin`, `POST /admin/sync/{source}`, `POST /admin/password-resets/{id}/complete` |
+| 상태 확인 | DB 연결 상태 | `GET /health` (`200 OK` 또는 `503 DB unavailable`) |
 
 `{id}`는 양의 정수로 검증한다. 목록은 `page`, `size`, `region`, `type`, `keyword` 등의 쿼리를 사용하며 허용한 정렬값만 받는다. 변경 성공 후에는 PRG(Post/Redirect/Get)를 적용한다. JSON API는 성공 시 데이터와 조회 시각을 주고, 실패 시 HTTP 상태와 사용자에게 표시할 오류 메시지를 준다. 모든 URL은 애플리케이션 컨텍스트 경로를 기준으로 생성한다.
 
@@ -71,11 +72,11 @@ erDiagram
 ## 외부 연동과 실패 처리
 
 - 관광지·사진: 수집 Service가 페이지 단위로 받아 공공데이터 ID로 upsert한다. 수집 이력을 로그에 남기고 실패 페이지는 재시도 가능하게 한다. 관리자 수동 실행과 일일 예약 실행을 같은 Service에 연결한다.
-- 뉴스: 뉴시스 문화 RSS에서 관광·여행 관련 제목을 필터링해 URL 기준 중복 제거한다. 일일 실행하고 원문 링크로 이동시킨다.
+- 뉴스: 뉴시스 문화·지방·수도권 RSS에서 관광·여행 관련 제목을 필터링해 URL 기준 중복 제거한다. 새로 저장된 건수와 확인한 기사 건수를 구분해 표시하고, 일일 실행하며 원문 링크로 이동시킨다.
 - 날씨: OpenWeather의 좌표 기반 5일·3시간 예보를 호출한다. 같은 관광지의 반복 요청은 짧게 캐시하고 최신 조회 시각을 표시한다.
 - 일출·일몰: 한국천문연구원 API에 선택 날짜와 관광지 좌표를 보낸다. 화면 표기는 한국 시간대(`Asia/Seoul`)로 통일한다.
 - 충전소: 한국환경공단 API의 위치·상태를 받아 관광지 주변 항목만 보여준다. 상태 갱신 시각을 함께 표시한다.
-- Kakao 지도: 관광지·Hot Place·계획 경유지 마커와 방문 순서를 그린다. 지도 키와 실행 도메인은 환경별로 설정한다.
+- Leaflet/OpenStreetMap 지도: 관광지·Hot Place·계획 경유지 마커와 방문 순서를 그린다. 브라우저에서 타일을 직접 요청하며 출처 표기를 표시한다.
 
 외부 호출은 연결·읽기 타임아웃을 적용한다. 사용자 요청에서 API가 실패해도 저장된 주요 콘텐츠 화면은 유지하고, 해당 부가 정보 영역에만 오류를 표시한다. 키가 없는 로컬 환경은 외부 연동 테스트용 가짜 응답을 사용한다.
 

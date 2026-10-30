@@ -49,10 +49,10 @@
 | 용도 | 공급원 | 처리 |
 | --- | --- | --- |
 | 관광지·사진 | [한국관광공사 국문 관광정보 API](https://www.data.go.kr/data/15101578/openapi.do), [사진 정보](https://www.data.go.kr/data/15101914/openapi.do) | 관리자 수동 실행 및 일일 동기화, 원본 ID 기준 갱신 |
-| 지도 | [Kakao Maps JavaScript API](https://apis.map.kakao.com/web/guide/) | 브라우저에서 마커·경로 표시. 등록 도메인과 키 필요 |
+| 지도 | [Leaflet](https://leafletjs.com/examples/quick-start/) + [OpenStreetMap 타일](https://operations.osmfoundation.org/policies/tiles/) | 브라우저에서 마커·경로 표시. 별도 키 없이 사용하고 출처 표기·타일 이용 정책 준수 |
 | 날씨 | [OpenWeather 5일 예보](https://openweathermap.org/api/forecast5) | 관광지 좌표로 조회, 최신 조회 시각 표시 |
 | 일출·일몰 | [한국천문연구원 출몰시각 정보](https://www.data.go.kr/data/15012688/openapi.do) | 날짜와 좌표로 조회 |
 | 충전소 | [한국환경공단 전기자동차 충전소 정보](https://www.data.go.kr/data/15076352/openapi.do) | 관광지 주변 좌표로 조회, 상태 갱신 시각 표시 |
-| 뉴스 | [뉴시스 문화 RSS](https://www.newsis.com/RSS/) | 관광 관련 키워드 필터, 제목·링크·발행일만 저장 |
+| 뉴스 | [뉴시스 문화·지방·수도권 RSS](https://www.newsis.com/RSS/) | 관광 관련 키워드 필터, URL 중복 제거, 제목·링크·발행일만 저장 |
 
 외부 제공자의 인증 방식과 응답 필드는 구현 시 공식 API 문서에 맞춘다. 서비스 키가 없거나 호출이 실패하면 관광지·뉴스는 마지막 정상 저장분을 보여주고, 날씨·일출·충전소는 해당 정보만 이용 불가로 안내한다.

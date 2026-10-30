@@ -8,6 +8,8 @@
 | [02-architecture.md](02-architecture.md) | Servlet/JSP 구조, 화면·요청 경로, 데이터 모델, 외부 연동, 다이어그램 |
 | [03-implementation-phases.md](03-implementation-phases.md) | 선행 조건과 단계별 구현 순서·완료 기준 |
 | [04-test-plan.md](04-test-plan.md) | 기능·권한·연동·화면 검증 시나리오 |
+| [05-implementation-status.md](05-implementation-status.md) | 구현 완료 항목과 실제 검증 결과·남은 외부 연동 확인 |
+| [06-local-run.md](06-local-run.md) | Windows 로컬 실행, DB 설정, 오류 해결 |
 
 ## 확정된 방향
 
@@ -19,4 +21,4 @@
 
 ## 구현 전 준비
 
-공공데이터포털 서비스 키, OpenWeather API 키, Kakao JavaScript 키와 등록 도메인, MySQL 8 실행 환경이 필요합니다. 키와 DB 비밀번호는 저장소에 커밋하지 않습니다. 키가 없는 환경에서도 외부 연동을 대체한 테스트를 실행할 수 있도록 설계합니다.
+공공데이터포털 서비스 키, OpenWeather API 키, MySQL 8 실행 환경이 필요합니다. 지도는 Leaflet과 OpenStreetMap을 사용해 별도 키가 필요하지 않습니다. 키와 DB 비밀번호는 저장소에 커밋하지 않습니다. 키가 없는 환경에서도 외부 연동을 대체한 테스트를 실행할 수 있도록 설계합니다.
