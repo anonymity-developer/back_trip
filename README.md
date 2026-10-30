@@ -2,6 +2,10 @@
 
 Servlet/JSP와 **Servlet(Controller) → Service → Dao → Dto** 구조로 구현한 공공데이터 기반 여행 서비스입니다. 요구사항과 설계는 [개발 문서](docs/README.md)를 참고하세요.
 
+## 제출용 산출물
+
+[산출물 README](deliverables/README.md)에 개선된 요구사항 목록, 유즈케이스·클래스 다이어그램, 실제 8080 실행 화면 캡처 17장과 검증 범위를 모았습니다. [전체 화면 캡처](deliverables/screenshots/README.md)도 바로 확인할 수 있습니다.
+
 ## 요구 환경
 
 - Java 21, Tomcat 11, MySQL 8. Maven은 포함된 Wrapper가 자동으로 준비합니다.
