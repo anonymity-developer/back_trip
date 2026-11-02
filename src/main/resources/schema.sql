@@ -1,3 +1,4 @@
+-- Active: 1793240841926@@127.0.0.1@3306@enjoytrip
 CREATE DATABASE IF NOT EXISTS enjoytrip CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE enjoytrip;
 
