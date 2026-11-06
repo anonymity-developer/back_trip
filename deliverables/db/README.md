@@ -25,13 +25,15 @@
 
 이미 준비된 작업 폴더에서는 [상태 확인·바로 테스트](../../docs/db/06-local-test.md#0-이미-준비된-환경에서는-바로-테스트)를 먼저 따른다. 아래는 새 환경을 구축하는 순서다.
 
-1. [상세 안내 1절](../../docs/db/06-local-test.md#1-새-환경에서-검증용-mysql-시작)에 따라 격리 MySQL을 13307에 시작한다.
+현재는 프로젝트 루트 `.env` 하나를 사용한다. 같은 파일의 키·DB 계정·관리자 계정을 앱과 도구가 재사용하며 테스트용 설정 파일을 생성하지 않는다. 이전 13307 격리 환경은 최초 검증 기록이고 현재 앱은 기본 DB(3306/enjoytrip)를 사용한다.
+
+1. [상세 안내 1절](../../docs/db/06-local-test.md#1-공통-설정과-서버-상태)에서 공통 `.env`와 MySQL 상태를 확인한다.
 2. 원본 두 SQL을 `temp/`에 준비하고 `python scripts/db/prepare-source.py`로 검증용 SQL을 만든다. 원본은 Git에서 제외되어 있으므로 별도 제공받아야 한다.
-3. `python scripts/db/run-sql.py --port 13307 --file target/db/source.sql`로 새 `trip_source`에 원본을 적재한다. 같은 스키마가 이미 있으면 중단한다.
-4. `python scripts/db/setup-test.py --port 13307 --import-source`로 전용 `enjoytrip_test`와 로컬 설정을 준비한다.
-5. `JAVA_HOME` 지정 후 `.\run-local.ps1 -Port 18080 -EnvFile target/db/app.env`로 앱을 실행한다. 외부 키가 없어도 저장된 50,915건을 검색할 수 있다.
+3. `python scripts/db/run-sql.py --file target/db/source.sql`로 공통 설정의 서버에 새 `trip_source` 원본을 적재한다. 같은 스키마가 있으면 중단한다. 현재 개발 DB에는 이미 관광지가 있어 재적재할 필요 없다.
+4. 새 앱 DB라면 DDL·기준정보·변환 적재 SQL을 [상세 안내](../../docs/db/06-local-test.md)에 따라 적용한다. DAO 테스트만 실행할 때는 `python scripts/db/setup-test.py --with-attractions`를 사용하며 별도 env·계정을 만들지 않는다.
+5. `JAVA_HOME` 지정 후 `.\run-local.ps1 -Port 18080`으로 실행한다. 키 없이도 저장된 관광지를 조회할 수 있다.
 6. 다른 창에서 `python scripts/db/http-smoke.py --base-url http://127.0.0.1:18080/enjoytrip`를 실행한다. 기대 결과는 5개 PASS다. 임시 회원·콘텐츠는 정리된다.
-7. 공개 시연 데이터를 남기려면 앱 최초 실행 후 `python scripts/db/run-sql.py --port 13307 --file src/main/resources/db/seed/demo-data.sql`을 실행한다. 계획 id가 출력된다. 관리자 로그인 정보는 로컬 `target/db/app.env`에서 확인한다.
+7. 관리자 로그인 정보는 루트 `.env`에서 확인한다. 기존 공개 시연 계획은 기본 DB로 옮겨 두었다. `demo-data.sql`은 별도 테스트 DB용이며 일반 실행에 필요 없다.
 
 신규 운영 DB는 DDL→기준정보 순으로 생성하고, 기존 DB는 백업·앱 중지 후 업그레이드 SQL을 사용한다. 제공 원본의 DROP/컬럼 없는 INSERT를 앱 DB에 직접 실행하지 않는다. 정확한 절차·기대 결과·복구는 [직접 테스트 안내](../../docs/db/06-local-test.md)에 있다.
 

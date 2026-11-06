@@ -17,7 +17,7 @@ Servlet/JSP·JDBC·MySQL로 구현한 공공데이터 기반 여행 서비스입
 1. 새 DB는 `src/main/resources/schema.sql`과 `src/main/resources/db/seed/lookup-data.sql`을 차례로 실행합니다. 기존 DB는 앱·동기화를 중지하고 백업한 뒤 `src/main/resources/db/migrations/001-db-extension.sql`을 실행합니다. 기본 DB 이름은 `enjoytrip`입니다. 제공 덤프 적재·격리 검증은 [상세 실행 안내](docs/db/06-local-test.md)를 따릅니다.
 2. [.env.example](.env.example)을 참고해 Git에서 제외되는 `.env`에 실제 값을 입력합니다. `replace-me`는 예시값이므로 실제 MySQL·관리자 비밀번호로 바꿉니다. 실제 비밀번호나 API 키를 커밋하지 않습니다.
 3. Windows는 `.\run-local.ps1`을 실행합니다. 스크립트가 Maven 빌드와 테스트를 수행하고 `.env`를 Tomcat 프로세스에 전달합니다. macOS/Linux는 `./mvnw clean package` 후 환경 변수를 설정한 Tomcat 11의 `webapps`에 `target/enjoytrip.war`를 배포합니다.
-4. `http://localhost:8080/enjoytrip/health`에서 `OK`를 확인한 다음 `/enjoytrip/`에서 홈을 엽니다. API를 사용할 때는 관리자 화면에서 동기화를 시작합니다. 키 없이 제공 덤프로도 관광지를 조회할 수 있습니다. 격리 테스트는 `.\run-local.ps1 -Port 18080 -EnvFile target/db/app.env`처럼 별도 설정을 지정할 수 있습니다.
+4. `http://localhost:8080/enjoytrip/health`에서 `OK`를 확인한 다음 `/enjoytrip/`에서 홈을 엽니다. 다른 포트는 `.\run-local.ps1 -Port 18080`으로 시작합니다. 앱·DB 도구·HTTP 검증은 모두 루트 `.env` 하나를 사용하며, 별도 `app.env`나 `-EnvFile` 옵션은 사용하지 않습니다.
 
 | 환경 변수 | 용도 |
 | --- | --- |
@@ -41,6 +41,6 @@ Servlet/JSP·JDBC·MySQL로 구현한 공공데이터 기반 여행 서비스입
 
 ## 검증
 
-기본 `.\mvnw.cmd test`는 8건 통과·DB 통합 1건 생략입니다. 전용 DB를 준비하고 `ENJOYTRIP_DB_TEST=true`로 실행하면 총 9건을 검증합니다. 설치·테스트 명령과 브라우저별 기대 결과는 [직접 테스트 안내](docs/db/06-local-test.md), 실제 확인 범위와 남은 외부 연동은 [검증 결과](deliverables/db/verification.md)에 있습니다.
+`.\scripts\test.ps1`은 공통 `.env`를 읽고 8건 통과·DB 통합 1건 생략입니다. `python scripts/db/setup-test.py --with-attractions`로 테스트 DB를 준비한 뒤 `.\scripts\test.ps1 -Integration`을 실행하면 같은 서버·인증정보로 총 9건을 검증합니다. 별도 설정 파일·계정을 만들지 않습니다. [직접 테스트 안내](docs/db/06-local-test.md)와 [검증 결과](deliverables/db/verification.md)를 참고하세요.
 
 `temp/`는 `.gitignore`에 포함되어 프로젝트 명세서 원본이 Git에 올라가지 않습니다.

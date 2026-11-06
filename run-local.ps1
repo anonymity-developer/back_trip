@@ -1,12 +1,11 @@
 param(
     [string]$TomcatHome = 'C:\tools\app\apache-tomcat-11.0.26',
-    [ValidateRange(1, 65535)][int]$Port = 8080,
-    [string]$EnvFile = '.env'
+    [ValidateRange(1, 65535)][int]$Port = 8080
 )
 
 $ErrorActionPreference = 'Stop'
 $projectRoot = $PSScriptRoot
-$envFile = if ([System.IO.Path]::IsPathRooted($EnvFile)) { $EnvFile } else { Join-Path $projectRoot $EnvFile }
+$envFile = Join-Path $projectRoot '.env'
 $warFile = Join-Path $projectRoot 'target\enjoytrip.war'
 $tomcatBase = Join-Path $projectRoot "target\local-tomcat-$Port"
 
@@ -26,19 +25,8 @@ try {
     $portProbe.Dispose()
 }
 
-foreach ($line in Get-Content -LiteralPath $envFile -Encoding utf8) {
-    $entry = $line.Trim()
-    if ($entry.Length -eq 0 -or $entry.StartsWith('#')) { continue }
-    if ($entry -notmatch '^([A-Za-z_][A-Za-z0-9_]*)=(.*)$') {
-        throw 'Invalid .env line. Expected NAME=value.'
-    }
-    $name = $Matches[1]
-    $value = $Matches[2].Trim()
-    if ($value.Length -ge 2 -and (($value.StartsWith('"') -and $value.EndsWith('"')) -or ($value.StartsWith("'") -and $value.EndsWith("'")))) {
-        $value = $value.Substring(1, $value.Length - 2)
-    }
-    [Environment]::SetEnvironmentVariable($name, $value, 'Process')
-}
+. (Join-Path $projectRoot 'scripts\Import-ProjectEnv.ps1')
+Import-ProjectEnv -Path $envFile
 
 foreach ($name in @('ENJOYTRIP_DB_URL', 'ENJOYTRIP_DB_USER', 'ENJOYTRIP_DB_PASSWORD')) {
     if ([string]::IsNullOrWhiteSpace([Environment]::GetEnvironmentVariable($name, 'Process'))) {

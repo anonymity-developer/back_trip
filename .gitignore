@@ -4,6 +4,8 @@
 # Maven and Java build output
 /target/
 *.class
+__pycache__/
+*.py[cod]
 *.war
 *.jar
 !/.mvn/wrapper/maven-wrapper.jar

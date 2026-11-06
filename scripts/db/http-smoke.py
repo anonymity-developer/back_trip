@@ -4,12 +4,12 @@ import base64
 from datetime import date
 from http.cookiejar import CookieJar
 import json
-from pathlib import Path
 import re
 import secrets
 from urllib.error import HTTPError
 from urllib.parse import urlencode, urlparse
 from urllib.request import build_opener, HTTPCookieProcessor, Request
+from settings import load_settings
 
 
 class Browser:
@@ -41,12 +41,10 @@ class Browser:
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--base-url', required=True)
-    parser.add_argument('--env-file', type=Path, default=Path('target/db/app.env'))
     args = parser.parse_args()
     base = args.base_url.rstrip('/')
     assert urlparse(base).hostname in ('127.0.0.1', 'localhost'), 'Only isolated local servers are supported'
-    config = dict(line.split('=', 1) for line in args.env_file.read_text(encoding='utf-8').splitlines() if '=' in line)
-    assert '/enjoytrip_test?' in config['ENJOYTRIP_DB_URL'], 'Use dedicated enjoytrip_test settings'
+    config = load_settings()
     guest = Browser(base)
     for path in ('/health', '/', '/attractions', '/plans', '/hot-places', '/news', '/notices', '/posts'):
         guest.request(path)
@@ -61,8 +59,9 @@ def main():
     attraction = values[0]['id']
     guest.request(f'/attractions/{attraction}')
     guest.request(f'/api/attractions/{attraction}/photos')
-    guest.request(f'/api/attractions/{attraction}/weather', expected=503)
-    print('PASS: public pages, filters, 20 cards, 10-item JSON, detail/photos, missing weather key')
+    if not config.get('ENJOYTRIP_WEATHER_API_KEY'):
+        guest.request(f'/api/attractions/{attraction}/weather', expected=503)
+    print('PASS: public pages, filters, 20 cards, 10-item JSON, detail/photos')
 
     member = Browser(base)
     other = Browser(base)
@@ -99,8 +98,9 @@ def main():
         member.post(f'/plans/{plan}/edit', {'title': 'DB 비공개 계획', 'startDate': today, 'endDate': today, 'budget': '1000', 'details': 'private'})
         guest.request(f'/plans/{plan}', expected=404)
         other.request(f'/plans/{plan}', expected=404)
-        member.post('/posts/new', {'title': 'DB 검증 게시글', 'body': '<script>test</script>'})
-        listing, _ = member.request('/posts')
+        post_title = 'DB 검증 게시글 ' + secrets.token_hex(8)
+        member.post('/posts/new', {'title': post_title, 'body': '<script>test</script>'})
+        listing, _ = member.request('/posts?' + urlencode({'keyword': post_title}))
         post = int(re.search(r'/posts/(\d+)', listing).group(1))
         detail, _ = guest.request(f'/posts/{post}')
         assert '&lt;script&gt;test&lt;/script&gt;' in detail
@@ -127,14 +127,19 @@ def main():
         admin.request('/login', {'csrf': admin.csrf(), 'loginId': config['ENJOYTRIP_ADMIN_ID'], 'password': config['ENJOYTRIP_ADMIN_PASSWORD']})
         admin.request('/admin')
         admin.request(f'/plans/{plan}', expected=404)
-        admin.post('/admin/sync/tour', {}, expected=503)
-        admin.post('/admin/sync/news', {}, expected=503)
-        admin.post('/notices/new', {'title': 'DB 검증 공지', 'body': '검증'})
-        notice = int(re.search(r'/notices/(\d+)', admin.request('/notices')[0]).group(1))
+        if config.get('ENJOYTRIP_SYNC_ENABLED', 'true').lower() == 'false':
+            admin.post('/admin/sync/tour', {}, expected=503)
+            admin.post('/admin/sync/news', {}, expected=503)
+        notice_title = 'DB 검증 공지 ' + secrets.token_hex(8)
+        admin.post('/notices/new', {'title': notice_title, 'body': '검증'})
+        listing, _ = admin.request('/notices?' + urlencode({'keyword': notice_title}))
+        notice = int(re.search(r'/notices/(\d+)', listing).group(1))
         admin.post(f'/notices/{notice}/edit', {'title': 'DB 수정 공지', 'body': '수정 확인'})
         admin.post(f'/notices/{notice}/delete', {})
         guest.request('/password-reset', {'csrf': guest.csrf('/password-reset'), 'email': accounts[other][1]})
-        reset_id = int(re.search(r'/admin/password-resets/(\d+)/complete', admin.request('/admin')[0]).group(1))
+        admin_page, _ = admin.request('/admin')
+        request_row = next(row for row in re.findall(r'<tr>(.*?)</tr>', admin_page, re.S) if accounts[other][0] in row)
+        reset_id = int(re.search(r'/admin/password-resets/(\d+)/complete', request_row).group(1))
         reset_page, _ = admin.post(f'/admin/password-resets/{reset_id}/complete', {})
         temporary = re.search(r'임시 비밀번호: <strong>([^<]+)</strong>', reset_page).group(1)
         repeated, _ = admin.post(f'/admin/password-resets/{reset_id}/complete', {})
@@ -144,7 +149,7 @@ def main():
         assert changed_url.endswith('/password-change')
         other.post('/password-change', {'oldPassword': temporary, 'newPassword': password})
         other.request('/me')
-        print('PASS: photo upload/read/delete, administrator notice, private plan protection, paused manual sync')
+        print('PASS: photo upload/read/delete, administrator notice, private plan protection, configured sync policy')
         print('PASS: password reset request/admin completion, repeated completion rejection, forced password change')
     finally:
         for browser in reversed(created):

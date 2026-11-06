@@ -1,5 +1,5 @@
 -- Optional synthetic content ONLY for the dedicated test DB.
--- Run setup-test.py --import-source and start the app once to bootstrap admin_verify first.
+-- Run setup-test.py --with-attractions and provide a test administrator first.
 USE enjoytrip_test;
 SET NAMES utf8mb4;
 SET time_zone='+09:00';
@@ -12,7 +12,7 @@ BEGIN
   DECLARE first_stop BIGINT;
   DECLARE second_stop BIGINT;
   DECLARE EXIT HANDLER FOR SQLEXCEPTION BEGIN ROLLBACK; RESIGNAL; END;
-  SELECT id INTO owner_id FROM users WHERE login_id='admin_verify' AND role='ADMIN';
+  SELECT id INTO owner_id FROM users WHERE role='ADMIN' ORDER BY id LIMIT 1;
   SELECT id INTO first_stop FROM attractions WHERE content_id=2733967;
   SELECT id INTO second_stop FROM attractions WHERE area_code=1 AND content_type=12
     AND content_id<>2733967 AND latitude IS NOT NULL AND longitude IS NOT NULL ORDER BY content_id LIMIT 1;
