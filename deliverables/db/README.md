@@ -23,7 +23,9 @@
 
 검증 환경은 MySQL 8.0.46, Tomcat 11.0.26, Java 25 JDK(`--release 21`)다. 앱 요구 대상은 Java 21 이상이다. 원본 수집과 기존 데이터 변경을 제어하도록 별도 검증 인스턴스를 사용했다.
 
-1. [상세 안내 1절](../../docs/db/06-local-test.md#1-검증용-mysql-시작)에 따라 격리 MySQL을 13307에 시작한다.
+이미 준비된 작업 폴더에서는 [상태 확인·바로 테스트](../../docs/db/06-local-test.md#0-이미-준비된-환경에서는-바로-테스트)를 먼저 따른다. 아래는 새 환경을 구축하는 순서다.
+
+1. [상세 안내 1절](../../docs/db/06-local-test.md#1-새-환경에서-검증용-mysql-시작)에 따라 격리 MySQL을 13307에 시작한다.
 2. 원본 두 SQL을 `temp/`에 준비하고 `python scripts/db/prepare-source.py`로 검증용 SQL을 만든다. 원본은 Git에서 제외되어 있으므로 별도 제공받아야 한다.
 3. `python scripts/db/run-sql.py --port 13307 --file target/db/source.sql`로 새 `trip_source`에 원본을 적재한다. 같은 스키마가 이미 있으면 중단한다.
 4. `python scripts/db/setup-test.py --port 13307 --import-source`로 전용 `enjoytrip_test`와 로컬 설정을 준비한다.

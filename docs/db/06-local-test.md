@@ -2,19 +2,63 @@
 
 프로젝트 루트의 PowerShell에서 실행한다. 실제 사용 중인 3306 DB를 자동 변경하는 스크립트는 제공하지 않는다. 아래는 별도 13307 포트의 검증용 MySQL 기준이다. 기존 DB 적용은 백업·앱/동기화 중지 후 동일한 업그레이드 절차로 수행한다.
 
-## 1. 검증용 MySQL 시작
+## 0. 이미 준비된 환경에서는 바로 테스트
+
+개발 과정에서 검증용 MySQL·DB·앱을 준비해 실행해 두었다. **현재 작업 폴더에서 기능만 확인하려면 1~4절의 초기화·서버 시작·적재를 반복하지 않는다.** 먼저 다음 명령으로 상태를 확인한다.
+
+```powershell
+Invoke-RestMethod http://127.0.0.1:18080/enjoytrip/health
+Get-NetTCPConnection -State Listen -LocalPort 13307,18080 -ErrorAction SilentlyContinue |
+    Select-Object LocalAddress,LocalPort,OwningProcess
+```
+
+`OK`와 두 포트가 확인되면 브라우저에서 [테스트 앱](http://127.0.0.1:18080/enjoytrip/)을 열고 **5절의 브라우저 확인 순서**부터 진행한다. 자동 회귀 테스트도 바로 실행할 수 있다.
+
+```powershell
+python scripts/db/http-smoke.py --base-url http://127.0.0.1:18080/enjoytrip
+```
+
+관리자 계정은 `target/db/app.env`에서 로컬로 확인한다. 이 상태에서 `setup-test.py`, 원본 적재, 초기화는 필요하지 않다.
+
+앱만 꺼져 있고 MySQL 13307이 실행 중이라면 초기화·적재 없이 아래처럼 앱만 시작한다. 이때 `JAVA_HOME`은 5절의 JDK 설정을 따른다.
+
+```powershell
+.\run-local.ps1 -Port 18080 -EnvFile target/db/app.env
+```
+
+MySQL도 꺼져 있지만 `target/db/mysql-data/ibdata1`이 있다면 **초기화 없이** 1절의 서버 시작 명령만 실행한다. PC 재시작 후에도 DB 파일은 남으므로 초기화하지 않는다.
+
+### 같은 오류가 발생한 경우
+
+- `--initialize specified but the data directory has files in it`: 초기화된 폴더에 초기화를 다시 요청한 것이다. 기존 파일을 삭제하지 말고 초기화 단계를 생략한다.
+- `ibdata1 must be writable`: 같은 데이터 폴더로 실행 중인 MySQL이 파일을 사용하고 있을 수 있다. 먼저 13307 포트와 `/health`를 확인한다. 이미 정상 응답하면 기존 서버를 사용하며 다른 mysqld를 시작하지 않는다. 서버가 전혀 없는데도 같은 오류라면 파일 권한·로그를 별도 확인해야 한다.
+
+## 1. 새 환경에서 검증용 MySQL 시작
 
 Python 3, MySQL 8.0 또는 8.4의 서버·클라이언트가 필요하다. 다음은 현재 설치 경로와 저장소 경로 기준이다. 데이터 디렉터리 초기화는 **처음 한 번만** 한다. 이미 디렉터리에 DB 파일이 있으면 초기화 명령을 반복하지 않는다.
 
 ```powershell
-New-Item -ItemType Directory -Force target/db/mysql-data | Out-Null
-& 'C:/Program Files/MySQL/MySQL Server 8.0/bin/mysqld.exe' --no-defaults --initialize-insecure --basedir='C:/Program Files/MySQL/MySQL Server 8.0' --datadir='C:/tools/workspace/backtrip/target/db/mysql-data' --console
+if (Test-Path -LiteralPath target/db/mysql-data/ibdata1) {
+    Write-Host '이미 초기화되어 있습니다. 초기화하지 않고 기존 DB를 사용합니다.'
+} else {
+    if ((Test-Path -LiteralPath target/db/mysql-data) -and
+        (Get-ChildItem -LiteralPath target/db/mysql-data -Force | Select-Object -First 1)) {
+        throw '데이터 폴더가 비어 있지 않습니다. 초기화하지 말고 상태를 확인하세요.'
+    }
+    New-Item -ItemType Directory -Force target/db/mysql-data | Out-Null
+    & 'C:/Program Files/MySQL/MySQL Server 8.0/bin/mysqld.exe' --no-defaults --initialize-insecure --basedir='C:/Program Files/MySQL/MySQL Server 8.0' --datadir='C:/tools/workspace/backtrip/target/db/mysql-data' --console
+    if ($LASTEXITCODE -ne 0) { throw 'MySQL 초기화에 실패했습니다.' }
+}
 ```
 
 첫 창에서 다음 서버를 실행하고 창을 유지한다. 비밀번호 없는 root는 이 로컬 검증 인스턴스의 초기 계정이며 기존 MySQL 계정과 별개다. 접속은 127.0.0.1로 제한한다.
 
 ```powershell
-& 'C:/Program Files/MySQL/MySQL Server 8.0/bin/mysqld.exe' --no-defaults --basedir='C:/Program Files/MySQL/MySQL Server 8.0' --datadir='C:/tools/workspace/backtrip/target/db/mysql-data' --bind-address=127.0.0.1 --port=13307 --mysqlx=OFF --max-allowed-packet=64M --console
+if (Get-NetTCPConnection -State Listen -LocalPort 13307 -ErrorAction SilentlyContinue) {
+    Write-Host '13307 포트가 사용 중입니다. 기존 서버를 확인하고 중복 실행하지 마세요.'
+} else {
+    & 'C:/Program Files/MySQL/MySQL Server 8.0/bin/mysqld.exe' --no-defaults --basedir='C:/Program Files/MySQL/MySQL Server 8.0' --datadir='C:/tools/workspace/backtrip/target/db/mysql-data' --bind-address=127.0.0.1 --port=13307 --mysqlx=OFF --max-allowed-packet=64M --console
+}
 ```
 
 다른 PowerShell 창에서 이후 명령을 실행한다. MySQL 클라이언트가 PATH에 없다면 `run-sql.py`에 `--mysql '전체 mysql.exe 경로'`를 추가한다. 서버 설치 경로나 작업 폴더가 다르면 위 경로를 실제 위치에 맞춘다.
