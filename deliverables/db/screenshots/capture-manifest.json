@@ -1,0 +1,305 @@
+{
+  "baseUrl": "http://127.0.0.1:18080/enjoytrip",
+  "database": "enjoytrip",
+  "dbPort": 3306,
+  "configuration": "project root .env",
+  "attractions": 51622,
+  "news": 10,
+  "capturedAtKst": "2026-11-06T11:23:51.569896+09:00",
+  "photoUrl": "http://tong.visitkorea.or.kr/cms/resource/09/3303909_image2_1.jpg",
+  "placeIds": [
+    22535,
+    981
+  ],
+  "screenshots": [
+    {
+      "file": "01-home.png",
+      "path": "/enjoytrip/",
+      "description": "관광지 탐색·계획·맛집으로 연결되는 홈",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "fullPage": true,
+      "timeKst": "2026-11-06 11:26:29",
+      "imageSize": {
+        "width": 1440,
+        "height": 1181
+      }
+    },
+    {
+      "file": "02-attractions-seoul.png",
+      "path": "/enjoytrip/attractions?region=1&type=12",
+      "description": "DB 기준 서울 관광지 목록",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "fullPage": true,
+      "timeKst": "2026-11-06 11:26:31",
+      "imageSize": {
+        "width": 1440,
+        "height": 2645
+      }
+    },
+    {
+      "file": "03-attraction-detail.png",
+      "path": "/enjoytrip/attractions/22535",
+      "description": "가회동성당 사진·설명·지도·실제 부가 정보 응답",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "fullPage": true,
+      "timeKst": "2026-11-06 11:26:32",
+      "imageSize": {
+        "width": 1440,
+        "height": 3460
+      }
+    },
+    {
+      "file": "04-travel-info.png",
+      "path": "/enjoytrip/attractions/22535",
+      "description": "여행 정보 영역 실제 응답",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "element": "여행 정보 panel",
+      "imageSize": {
+        "width": 1180,
+        "height": 332
+      }
+    },
+    {
+      "file": "05-news.png",
+      "path": "/enjoytrip/news",
+      "description": "실제 RSS 수집 뉴스와 원문 링크",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "fullPage": true,
+      "timeKst": "2026-11-06 11:26:34",
+      "imageSize": {
+        "width": 1440,
+        "height": 1545
+      }
+    },
+    {
+      "file": "06-login.png",
+      "path": "/enjoytrip/login",
+      "description": "로그인 화면",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "fullPage": false,
+      "timeKst": "2026-11-06 11:26:35",
+      "imageSize": {
+        "width": 1440,
+        "height": 1000
+      }
+    },
+    {
+      "file": "07-profile.png",
+      "path": "/enjoytrip/me",
+      "description": "시연용 회원의 프로필 조회·수정·탈퇴",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "fullPage": true,
+      "timeKst": "2026-11-06 11:26:45",
+      "imageSize": {
+        "width": 1440,
+        "height": 1054
+      }
+    },
+    {
+      "file": "08-plan-list.png",
+      "path": "/enjoytrip/plans",
+      "description": "공개 계획과 내가 작성한 계획",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "fullPage": true,
+      "timeKst": "2026-11-06 11:26:51",
+      "imageSize": {
+        "width": 1440,
+        "height": 1012
+      }
+    },
+    {
+      "file": "09-plan-detail.png",
+      "path": "/enjoytrip/plans/4",
+      "description": "일정·경비·관광지 2개·동선·공개 공유",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "fullPage": true,
+      "timeKst": "2026-11-06 11:26:53",
+      "imageSize": {
+        "width": 1440,
+        "height": 1870
+      }
+    },
+    {
+      "file": "10-plan-form.png",
+      "path": "/enjoytrip/plans/new",
+      "description": "일정·예산·상세 계획·공개 여부 입력",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "fullPage": true,
+      "timeKst": "2026-11-06 11:26:55",
+      "imageSize": {
+        "width": 1440,
+        "height": 1131
+      }
+    },
+    {
+      "file": "11-hot-list.png",
+      "path": "/enjoytrip/hot-places",
+      "description": "사진·장소·방문일을 공유하는 Hot Place 목록",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "fullPage": true,
+      "timeKst": "2026-11-06 11:26:59",
+      "imageSize": {
+        "width": 1440,
+        "height": 1012
+      }
+    },
+    {
+      "file": "12-hot-detail.png",
+      "path": "/enjoytrip/hot-places/2",
+      "description": "사진과 위치·방문일을 저장한 상세 화면",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "fullPage": true,
+      "timeKst": "2026-11-06 11:27:02",
+      "imageSize": {
+        "width": 1440,
+        "height": 1628
+      }
+    },
+    {
+      "file": "13-hot-form.png",
+      "path": "/enjoytrip/hot-places/new",
+      "description": "사진 업로드와 지도 좌표 선택",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "fullPage": true,
+      "timeKst": "2026-11-06 11:27:03",
+      "imageSize": {
+        "width": 1440,
+        "height": 1828
+      }
+    },
+    {
+      "file": "14-board.png",
+      "path": "/enjoytrip/posts",
+      "description": "회원 간 여행 정보를 공유하는 게시판",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "fullPage": true,
+      "timeKst": "2026-11-06 11:27:05",
+      "imageSize": {
+        "width": 1440,
+        "height": 1012
+      }
+    },
+    {
+      "file": "15-notices.png",
+      "path": "/enjoytrip/notices",
+      "description": "관리자가 작성하고 누구나 읽는 공지사항",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "fullPage": true,
+      "timeKst": "2026-11-06 11:27:07",
+      "imageSize": {
+        "width": 1440,
+        "height": 1012
+      }
+    },
+    {
+      "file": "16-admin.png",
+      "path": "/enjoytrip/admin",
+      "description": "현재 .env의 실제 관리자·수집 상태",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "fullPage": true,
+      "imageSize": {
+        "width": 1440,
+        "height": 1012
+      }
+    },
+    {
+      "file": "17-home-mobile.png",
+      "path": "/enjoytrip/",
+      "description": "모바일 실제 화면·가로 넘침 없음",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "fullPage": false,
+      "imageSize": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "file": "18-attractions-mobile.png",
+      "path": "/enjoytrip/attractions?region=1&type=39",
+      "description": "모바일 실제 화면·가로 넘침 없음",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "fullPage": false,
+      "imageSize": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "file": "19-mobile-menu.png",
+      "path": "/enjoytrip/attractions?region=1&type=39",
+      "description": "모바일 메뉴 열기",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageSize": {
+        "width": 390,
+        "height": 844
+      }
+    }
+  ],
+  "apiResponses": {
+    "sun": 200,
+    "weather": 200
+  },
+  "demo": {
+    "plan": 4,
+    "hotPlace": 2,
+    "syntheticMember": true,
+    "photoSource": "http://tong.visitkorea.or.kr/cms/resource/09/3303909_image2_1.jpg"
+  }
+}

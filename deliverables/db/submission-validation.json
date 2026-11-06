@@ -1,0 +1,13 @@
+{
+  "sql": "EnjoyTrip_db.sql",
+  "validatedAtKst": "2026-11-06T11:27:38.230285+09:00",
+  "tables": 12,
+  "attractions": 51622,
+  "exportedUsers": 0,
+  "sidos": 17,
+  "guguns": 234,
+  "contenttypes": 8,
+  "validationDatabase": "isolated dbtrip_submission_check, MySQL 8.0.46",
+  "sourceConfiguration": "project root .env",
+  "project": "dbtrip"
+}

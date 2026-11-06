@@ -1,44 +1,109 @@
-# EnjoyTrip DB 단계 산출물
+# EnjoyTrip — 여행지를 찾고, 나만의 여행을 기록하다
 
-기존 Servlet/JSP·JDBC 서비스를 유지하면서 제공 관광지 데이터를 연계했다. 기존 관광지의 내부 ID와 사용자 콘텐츠 참조를 보존하고, 시도·구군·유형 기준정보와 복합 구군 FK를 추가했다. 덤프는 신규 관광지와 누락 정보 보충에 사용하며 원본 SQL은 수정하지 않았다.
 
-## 산출물과 명세 대응
+EnjoyTrip은 국내 관광지를 지역·유형으로 찾아 여행 계획에 담고, 방문 사진과 장소를 공유하는 서비스입니다. Servlet·JSP로 화면을 제공하고 JDBC·MySQL로 회원, 관광지, 여행 일정, Hot Place와 게시글을 저장합니다.
 
-| 신규 DB 명세 §1.5 | 실제 자료 |
+이 문서의 화면은 **현재 프로젝트 루트 `.env`의 `3306/enjoytrip`에 연결된 실제 앱**에서 2026-11-06(KST)에 새로 캡처했습니다. 관광지 **51,622건**, 시도 17개·구군 234개·관광 유형 8개를 사용합니다. 화면을 합성하거나 성공 상태로 바꾸지 않았습니다.
+
+![EnjoyTrip 홈](screenshots/01-home.png)
+
+## 서비스 이용 흐름
+
+**여행지 검색 → 사진·지도·여행 정보 확인 → 일정·경비·방문 순서 저장 → 공개 계획 공유 → Hot Place·게시판으로 경험 나누기**
+
+### 1. 지역과 취향에 맞는 여행지 탐색
+
+서울 관광지, 제주 숙박, 지역별 음식점처럼 지역·유형·이름을 조합해 검색합니다. 선택지는 MySQL 기준정보에서 읽고 관광지는 20건씩 조회합니다. 상세에서는 대표 사진·설명·위치를 확인할 수 있습니다.
+
+| 서울 관광지 검색 | 관광지 상세·지도 |
 | --- | --- |
-| README | 이 문서, [직접 실행·테스트](../../docs/db/06-local-test.md) |
-| ER 다이어그램 | [전체 ERD·데이터 정의](erd.md), [SVG](erd.svg), [Mermaid 편집본](erd.mmd) |
-| DB Schema·DDL SQL | [최종 DDL](schema.sql), [실행 원본](../../src/main/resources/schema.sql), [기존 DB 업그레이드](../../src/main/resources/db/migrations/001-db-extension.sql) |
-| 구현 소스·실행 화면 | [Java 소스](../../src/main/java/kr/co/enjoytrip/), [테스트 소스](../../src/test/java/kr/co/enjoytrip/), [실제 화면 6장](screenshots/README.md) |
+| [![서울 관광지 목록](screenshots/02-attractions-seoul.png)](screenshots/02-attractions-seoul.png) | [![가회동성당 상세](screenshots/03-attraction-detail.png)](screenshots/03-attraction-detail.png) |
 
-초기·더미 데이터 및 생성형 AI 검토 목표(p.3)를 위한 자료도 제공한다.
+### 2. 나만의 일정·경비·동선 저장
 
-- [기준정보 초기 데이터](../../src/main/resources/db/seed/lookup-data.sql): 시도 17·구군 234·유형 8. 승인된 39번 이름 보정 포함.
-- [제공 관광지 변환 적재](../../src/main/resources/db/import/import-trip-source.sql), [검증 조회](../../src/main/resources/db/validation/verify-db.sql).
-- [검증 DB 준비](../../scripts/db/setup-test.py), [시연 계획·공지·게시글](../../src/main/resources/db/seed/demo-data.sql), [HTTP 시연·회귀 스크립트](../../scripts/db/http-smoke.py).
-- [원본 검증 파일 생성](../../scripts/db/prepare-source.py), [UTF-8 SQL 실행](../../scripts/db/run-sql.py), [ERD·데이터 정의 재생성](../../scripts/db/export-model.py).
-- [실제 검증 결과·남은 범위](verification.md), [원본 대비 검토·개선 근거](../../docs/db/01-requirements.md#제공-erdddl덤프-정적-검토).
+회원은 여행 기간·예산·상세 계획을 정하고, 검색한 관광지를 방문지로 추가합니다. 방문 순서를 변경하면 DB에 저장되고 지도에 동선이 표시됩니다. 공개 계획은 URL로 공유하며 비공개 계획은 작성자만 볼 수 있습니다.
 
-## 실행 요약
+| 계획 목록 | 일정·방문지 2개·지도 동선 |
+| --- | --- |
+| [![계획 목록](screenshots/08-plan-list.png)](screenshots/08-plan-list.png) | [![북촌 하루 여행](screenshots/09-plan-detail.png)](screenshots/09-plan-detail.png) |
 
-검증 환경은 MySQL 8.0.46, Tomcat 11.0.26, Java 25 JDK(`--release 21`)다. 앱 요구 대상은 Java 21 이상이다. 원본 수집과 기존 데이터 변경을 제어하도록 별도 검증 인스턴스를 사용했다.
+### 3. 사진과 함께 남기는 Hot Place
 
-이미 준비된 작업 폴더에서는 [상태 확인·바로 테스트](../../docs/db/06-local-test.md#0-이미-준비된-환경에서는-바로-테스트)를 먼저 따른다. 아래는 새 환경을 구축하는 순서다.
+방문일·장소 유형·설명·사진·지도 위치를 함께 기록합니다. 사진은 파일로, 작성자와 기록 정보는 MySQL에 저장하며 본인만 수정·삭제할 수 있습니다. 아래는 실제 등록한 **서비스 시연용 기록**입니다. 사용한 사진의 출처는 한국관광공사입니다.
 
-현재는 프로젝트 루트 `.env` 하나를 사용한다. 같은 파일의 키·DB 계정·관리자 계정을 앱과 도구가 재사용하며 테스트용 설정 파일을 생성하지 않는다. 이전 13307 격리 환경은 최초 검증 기록이고 현재 앱은 기본 DB(3306/enjoytrip)를 사용한다.
+| Hot Place 목록 | 사진·방문일·위치 상세 |
+| --- | --- |
+| [![Hot Place 목록](screenshots/11-hot-list.png)](screenshots/11-hot-list.png) | [![Hot Place 상세](screenshots/12-hot-detail.png)](screenshots/12-hot-detail.png) |
 
-1. [상세 안내 1절](../../docs/db/06-local-test.md#1-공통-설정과-서버-상태)에서 공통 `.env`와 MySQL 상태를 확인한다.
-2. 원본 두 SQL을 `temp/`에 준비하고 `python scripts/db/prepare-source.py`로 검증용 SQL을 만든다. 원본은 Git에서 제외되어 있으므로 별도 제공받아야 한다.
-3. `python scripts/db/run-sql.py --file target/db/source.sql`로 공통 설정의 서버에 새 `trip_source` 원본을 적재한다. 같은 스키마가 있으면 중단한다. 현재 개발 DB에는 이미 관광지가 있어 재적재할 필요 없다.
-4. 새 앱 DB라면 DDL·기준정보·변환 적재 SQL을 [상세 안내](../../docs/db/06-local-test.md)에 따라 적용한다. DAO 테스트만 실행할 때는 `python scripts/db/setup-test.py --with-attractions`를 사용하며 별도 env·계정을 만들지 않는다.
-5. `JAVA_HOME` 지정 후 `.\run-local.ps1 -Port 18080`으로 실행한다. 키 없이도 저장된 관광지를 조회할 수 있다.
-6. 다른 창에서 `python scripts/db/http-smoke.py --base-url http://127.0.0.1:18080/enjoytrip`를 실행한다. 기대 결과는 5개 PASS다. 임시 회원·콘텐츠는 정리된다.
-7. 관리자 로그인 정보는 루트 `.env`에서 확인한다. 기존 공개 시연 계획은 기본 DB로 옮겨 두었다. `demo-data.sql`은 별도 테스트 DB용이며 일반 실행에 필요 없다.
+### 4. 여행 뉴스와 커뮤니티
 
-신규 운영 DB는 DDL→기준정보 순으로 생성하고, 기존 DB는 백업·앱 중지 후 업그레이드 SQL을 사용한다. 제공 원본의 DROP/컬럼 없는 INSERT를 앱 DB에 직접 실행하지 않는다. 정확한 절차·기대 결과·복구는 [직접 테스트 안내](../../docs/db/06-local-test.md)에 있다.
+수집한 관광 관련 RSS 뉴스를 읽고 원문으로 이동할 수 있습니다. 공지는 관리자가 작성하고, 공유게시판은 회원이 여행 정보를 등록·수정·삭제합니다. 글은 작성자 권한과 출력 이스케이프를 적용합니다.
 
-## 검증 범위
+| 실제 수집 뉴스 | 여행 정보 공유게시판 |
+| --- | --- |
+| [![뉴스 목록](screenshots/05-news.png)](screenshots/05-news.png) | [![게시판 목록](screenshots/14-board.png)](screenshots/14-board.png) |
 
-단위·대역·DAO 통합 9건, HTTP 회원·인증·초기화·관광지·계획·Hot Place·공지·공유글·권한 흐름, 12개 테이블 백업 복원, 기존 ID/FK·반복 적재를 확인했다. 실제 기관 API·RSS 수집과 MySQL 8.4 실행은 미검증이다. 키 없는 날씨 503과 주요 DB 화면 유지까지 검증했다.
+### 5. 여행에 필요한 부가 정보와 모바일 화면
 
-이 폴더는 저장소 내부 제출 자료다. GitLab 업로드·ZIP 형식·원본 자료 재배포 규칙은 반별 제출 기준에 따라 마지막에 정한다. 실제 계정 비밀번호·키·로컬 백업·원본 덤프를 포함하지 않았다.
+관광지 좌표로 현재 날씨·예보와 날짜별 일출·일몰을 조회합니다. 이번 캡처에서는 날씨·일출·일몰 API가 HTTP 200을 반환했습니다. 충전소는 응답 지연으로 이번 성공 증거에 포함하지 않았습니다. 모바일에서도 검색·메뉴·주요 화면을 사용할 수 있습니다.
+
+![현재 설정의 날씨·일출·일몰 응답](screenshots/04-travel-info.png)
+
+모바일 화면은 [홈](screenshots/17-home-mobile.png), [지역·유형 검색](screenshots/18-attractions-mobile.png), [메뉴 열기](screenshots/19-mobile-menu.png)에서 확인할 수 있습니다. [전체 실행 화면 19장](screenshots/README.md)에는 로그인·회원 정보·등록 폼·관리자 화면도 포함합니다.
+
+## 기술·구조와 데이터베이스
+
+| 영역 | 적용 기술·책임 |
+| --- | --- |
+| 웹 | Java 21 대상, Servlet/JSP, JSTL, Maven WAR, Tomcat 11 |
+| 데이터 | JDBC·PreparedStatement, MySQL 8, PK/FK/UNIQUE/INDEX·트랜잭션 |
+| 계층 | Controller의 요청 처리 → Service의 업무·검증 → DAO의 SQL → DTO 전달 |
+| 지도 | Leaflet·OpenStreetMap의 마커·방문 동선·위치 선택 |
+| 인증·권한 | PBKDF2 해시, 세션 재발급, CSRF, 관리자·작성자·비공개 계획 검사 |
+| 설정 | 루트 `.env` 하나. 실제 값은 제출 ZIP·Git에 포함하지 않음 |
+
+```mermaid
+flowchart LR
+    Browser[브라우저] --> Controller[Servlet Controller]
+    Controller --> Service[Service]
+    Service --> DAO[JDBC DAO]
+    DAO --> DB[(MySQL)]
+    Controller --> JSP[JSP · JSTL]
+    Service --> API[관광정보 · RSS · 날씨 · 일출 · 충전소 API]
+```
+
+회원·여행 계획·방문지·사진·Hot Place·공지/공유글·뉴스·초기화 요청과 시도·구군·유형을 **12개 테이블**로 모델링했습니다. 구군은 시도와 함께 식별하고 `(area_code,sigungu_code)` 복합 FK로 지역 정합성을 보장합니다. 원본 공공 ID `content_id`와 앱 내부 `id`를 구분해 기존 계획·사진 참조를 보존합니다.
+
+![Workbench 전체 ERD](EnjoyTrip_db.png)
+
+[전체 컬럼·제약 설명](erd.md) · [Workbench 편집 모델](EnjoyTrip_db.mwb) · [DDL 원본](schema.sql) · [Mermaid/SVG 보조 자료](erd.svg)
+
+Workbench 자동 생성은 [공식 Workbench 소스의 저장·PNG 내보내기 API](https://github.com/mysql/mysql-workbench/blob/8.0/backend/wbprivate/workbench/wb_module.cpp)를 확인하고, 설치된 Workbench에서 실제 저장·재열기로 검증했습니다.
+
+## 필수 제출물
+
+| 필수 조건 | 준비 파일·확인 결과 |
+| --- | --- |
+| `x.mwb` | [EnjoyTrip_db.mwb](EnjoyTrip_db.mwb) — 실제 Workbench에서 생성·다시 열기 검증, 12개 테이블·그림·FK |
+| `x.sql` | [EnjoyTrip_db.sql](EnjoyTrip_db.sql) — 전체 DDL＋공개 관광지/사진/기준정보. 별도 빈 DB에서 12개 테이블·관광지 51,622건 복원 확인 |
+| `x.png`(ERD) | [EnjoyTrip_db.png](EnjoyTrip_db.png) — 같은 Workbench 모델에서 직접 내보낸 ERD |
+| 실행 화면·서비스 소개 | 이 README, [19개 새 캡처](screenshots/README.md), [캡처 환경·응답 기록](screenshots/capture-manifest.json) |
+| 소스·실행 안내 | ZIP의 `dbtrip/src`, `pom.xml`, Maven Wrapper, 실행 스크립트, [상세 테스트 안내](../../docs/db/06-local-test.md) |
+
+제출 SQL에는 **실제 회원·관리자·비밀번호 해시·개인 작성글·업로드 파일을 내보내지 않았습니다.** 실행 화면의 계획·Hot Place·글은 별도로 등록한 시연 자료입니다. 새 환경에서는 직접 회원 가입 후 같은 기능으로 작성할 수 있습니다.
+
+## 새 환경 실행
+
+1. Java 21 이상 JDK, MySQL 8, Tomcat 11을 준비합니다. 이번 실행은 Java 25 JDK의 `release 21`, MySQL 8.0.46, Tomcat 11.0.26으로 검증했습니다.
+2. **새 빈 DB 환경**에서 필수 SQL `EnjoyTrip_db.sql`을 실행합니다. 기본 DB는 `enjoytrip`이며 기준정보·관광지를 함께 준비합니다. 기존 DB를 사용한다면 백업 후 [업그레이드 안내](../../docs/db/06-local-test.md#2-신규-db-또는-기존-구조-업그레이드)를 따릅니다.
+3. ZIP의 `.env.example`을 `.env`로 복사해 MySQL 접속·관리자·업로드 경로와 사용할 API 키를 설정합니다. 실제 `.env`를 다른 사람에게 제출하지 않습니다. API 키 없이도 저장된 관광지와 회원·계획·커뮤니티를 사용할 수 있습니다.
+4. 프로젝트 루트에서 실행합니다. 기본 Tomcat 경로가 다르면 `-TomcatHome '설치 경로'`를 지정합니다.
+
+```powershell
+.\run-local.ps1
+```
+
+5. `http://localhost:8080/enjoytrip/health`의 `OK`를 확인한 뒤 [홈](http://localhost:8080/enjoytrip/)을 엽니다. 현재 작업 환경의 실행 포트는 18080입니다.
+
+단위·DB 통합·HTTP·권한·복구의 명령과 기대 결과는 [직접 테스트 안내](../../docs/db/06-local-test.md), 실제 실행 범위는 [검증 기록](verification.md)에 있습니다. 설정 키가 있어도 승인·제공자 응답은 별도로 확인해야 합니다.
+

@@ -1,5 +1,7 @@
 # 전체 ERD와 데이터 정의
 
+필수 제출용 편집 모델은 [EnjoyTrip_db.mwb](EnjoyTrip_db.mwb), 같은 모델의 이미지 파일은 [EnjoyTrip_db.png](EnjoyTrip_db.png), 실행용 전체 SQL은 [EnjoyTrip_db.sql](EnjoyTrip_db.sql)이다. 아래 Mermaid·컬럼 정의는 보조 설명이다.
+
 실제 `src/main/resources/schema.sql`에서 추출한 12개 테이블의 모델이다. 관계선과 복합 제약은 아래 설명을 함께 확인한다.
 
 [ERD SVG](erd.svg) · [Mermaid 편집본](erd.mmd) · [최종 DDL](schema.sql)
