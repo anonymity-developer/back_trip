@@ -88,16 +88,16 @@ Workbench 자동 생성은 [공식 Workbench 소스의 저장·PNG 내보내기 
 | `x.sql` | [EnjoyTrip_db.sql](EnjoyTrip_db.sql) — 전체 DDL＋공개 관광지/사진/기준정보. 별도 빈 DB에서 12개 테이블·관광지 51,622건 복원 확인 |
 | `x.png`(ERD) | [EnjoyTrip_db.png](EnjoyTrip_db.png) — 같은 Workbench 모델에서 직접 내보낸 ERD |
 | 실행 화면·서비스 소개 | 이 README, [19개 새 캡처](screenshots/README.md), [캡처 환경·응답 기록](screenshots/capture-manifest.json) |
-| 소스·실행 안내 | ZIP의 `dbtrip/src`, `pom.xml`, Maven Wrapper, 실행 스크립트, [상세 테스트 안내](../../docs/db/06-local-test.md) |
+| 소스·실행 안내 | **별도 소스코드 ZIP**의 `dbtrip/src`, `pom.xml`, Maven Wrapper, 실행 스크립트. [상세 테스트 안내](reference/local-run.md) |
 
 제출 SQL에는 **실제 회원·관리자·비밀번호 해시·개인 작성글·업로드 파일을 내보내지 않았습니다.** 실행 화면의 계획·Hot Place·글은 별도로 등록한 시연 자료입니다. 새 환경에서는 직접 회원 가입 후 같은 기능으로 작성할 수 있습니다.
 
 ## 새 환경 실행
 
 1. Java 21 이상 JDK, MySQL 8, Tomcat 11을 준비합니다. 이번 실행은 Java 25 JDK의 `release 21`, MySQL 8.0.46, Tomcat 11.0.26으로 검증했습니다.
-2. **새 빈 DB 환경**에서 필수 SQL `EnjoyTrip_db.sql`을 실행합니다. 기본 DB는 `enjoytrip`이며 기준정보·관광지를 함께 준비합니다. 기존 DB를 사용한다면 백업 후 [업그레이드 안내](../../docs/db/06-local-test.md#2-신규-db-또는-기존-구조-업그레이드)를 따릅니다.
-3. ZIP의 `.env.example`을 `.env`로 복사해 MySQL 접속·관리자·업로드 경로와 사용할 API 키를 설정합니다. 실제 `.env`를 다른 사람에게 제출하지 않습니다. API 키 없이도 저장된 관광지와 회원·계획·커뮤니티를 사용할 수 있습니다.
-4. 프로젝트 루트에서 실행합니다. 기본 Tomcat 경로가 다르면 `-TomcatHome '설치 경로'`를 지정합니다.
+2. **새 빈 DB 환경**에서 필수 SQL `EnjoyTrip_db.sql`을 실행합니다. 기본 DB는 `enjoytrip`이며 기준정보·관광지를 함께 준비합니다. 기존 DB를 사용한다면 백업 후 [업그레이드 안내](reference/local-run.md#기존-db-업그레이드)를 따릅니다.
+3. **소스코드 ZIP을 따로 압축 해제**하고 그 안의 `.env.example`을 `.env`로 복사해 MySQL 접속·관리자·업로드 경로와 사용할 API 키를 설정합니다. DB 산출물 ZIP에는 [설정 예시](reference/.env.example)만 참고용으로 포함합니다. 실제 `.env`는 제출하지 않습니다.
+4. 소스코드 ZIP의 `dbtrip/`에서 실행합니다. 기본 Tomcat 경로가 다르면 `-TomcatHome '설치 경로'`를 지정합니다.
 
 ```powershell
 .\run-local.ps1
@@ -105,5 +105,5 @@ Workbench 자동 생성은 [공식 Workbench 소스의 저장·PNG 내보내기 
 
 5. `http://localhost:8080/enjoytrip/health`의 `OK`를 확인한 뒤 [홈](http://localhost:8080/enjoytrip/)을 엽니다. 현재 작업 환경의 실행 포트는 18080입니다.
 
-단위·DB 통합·HTTP·권한·복구의 명령과 기대 결과는 [직접 테스트 안내](../../docs/db/06-local-test.md), 실제 실행 범위는 [검증 기록](verification.md)에 있습니다. 설정 키가 있어도 승인·제공자 응답은 별도로 확인해야 합니다.
+단위·DB 통합·HTTP·권한·복구의 명령과 기대 결과는 [직접 테스트 안내](reference/local-run.md), 실제 실행 범위는 [검증 기록](verification.md)에 있습니다. 설정 키가 있어도 승인·제공자 응답은 별도로 확인해야 합니다.
 

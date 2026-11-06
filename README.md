@@ -10,6 +10,8 @@ Servlet/JSP·JDBC·MySQL로 구현한 공공데이터 기반 여행 서비스입
 
 ## 제출용 산출물
 
+제출 압축은 **DB 산출물 ZIP**과 **소스코드 ZIP**을 별도로 만든다. 이전 `deliverables/back`·`docs/back`은 개발 저장소의 과거 기록으로만 보존하며 두 제출 ZIP에는 포함하지 않는다.
+
 [DB 산출물](deliverables/db/README.md)에 전체 12개 테이블 ERD·최종 DDL·실제 실행 화면·검증 결과를 정리했습니다. [기존 백엔드 산출물](deliverables/back/README.md)과 [기존 화면 캡처](deliverables/back/screenshots/README.md)는 이전 단계 기록입니다.
 
 ## 요구 환경

@@ -71,3 +71,11 @@
 - 필수 `EnjoyTrip_db.mwb`·`EnjoyTrip_db.sql`·`EnjoyTrip_db.png`를 준비했다. Workbench 네이티브 모델을 다시 열어 12개 테이블·표·FK를 확인하고, 공개 데이터가 포함된 SQL을 빈 DB에 복원했다.
 - 날씨·일출/일몰 200과 실제 표시·관광지/뉴스 수집 완료를 확인했다. 충전소는 응답 지연으로 미확인 상태를 유지한다.
 - ZIP은 `.git`·`bin`·실제 `.env`·target·로그·백업·개인 업로드·캐시를 제외한다. 작업 저장소 자체의 .git는 삭제하지 않는다.
+
+## DB 산출물·소스코드 ZIP 분리
+
+- 사용자 지적에 따라 패키징 범위를 수정했다. DB 산출물 ZIP은 `deliverables/db`만 최상위에 담고, 소스코드 ZIP은 실행 가능한 Maven 프로젝트를 `dbtrip/`에 담는다. 두 ZIP 모두 `deliverables/back`·`docs/back`을 제외한다. 저장소의 이전 자료 자체는 삭제하지 않는다.
+- 최종 파일은 `submission/db-final/EnjoyTrip_db.zip`, `submission/db-final/EnjoyTrip_source.zip`이다. `submission/` 바로 아래의 이전 혼합 ZIP은 사용하지 않는다.
+- DB ZIP에는 필수 MWB·전체 데이터 SQL·ERD PNG, 서비스 소개 README·19장 캡처·검증 기록·독립적인 실행 안내를 포함한다. 소스 ZIP에는 `src`·Maven Wrapper·빌드/실행/테스트 파일·설정 예시만 담고 전체 데이터·캡처·개발 문서를 중복 포장하지 않는다.
+- 각 ZIP의 압축 무결성·필수 파일·Markdown 상대 링크·제외 폴더·비밀값 검사를 통과했다. 소스 ZIP을 별도 `target/source-package-check/dbtrip`에 풀어 Maven `package`를 실행했고, WAR 생성·기본 테스트 8건 통과·DB 통합 1건 생략을 확인했다. 추출본에서 DB 통합 검증을 다시 실행한 것은 아니다.
+- 소스 ZIP의 루트 README 원본은 [소스 배포 안내](07-source-package.md), 제출 방법은 [제출 점검](../../deliverables/db/submission-checklist.md)을 따른다.
