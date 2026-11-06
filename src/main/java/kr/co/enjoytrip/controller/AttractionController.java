@@ -11,6 +11,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import kr.co.enjoytrip.config.AppLifecycle;
 import kr.co.enjoytrip.dto.AttractionDto;
 import kr.co.enjoytrip.service.AttractionService;
+import kr.co.enjoytrip.service.ValidationException;
 
 @WebServlet({"/home", "/attractions", "/attractions/*", "/admin/sync/tour"})
 public class AttractionController extends HttpServlet {
@@ -30,6 +31,7 @@ public class AttractionController extends HttpServlet {
                 List<AttractionDto> rows=attractions.search(area,type,keyword,page);
                 req.setAttribute("attractions",rows.size()>20?rows.subList(0,20):rows); req.setAttribute("page",page); req.setAttribute("hasNext",rows.size()>20);
                 req.setAttribute("region",area); req.setAttribute("type",type); req.setAttribute("keyword",keyword);
+                req.setAttribute("regions",attractions.sidos()); req.setAttribute("contentTypes",attractions.contentTypes());
                 view(req,res,"attractions");return;
             }
             if(path.startsWith("/attractions/")) {
@@ -40,7 +42,7 @@ public class AttractionController extends HttpServlet {
                 view(req,res,"attraction-detail");return;
             }
             res.sendError(404);
-        } catch(NumberFormatException e) {res.sendError(400);}
+        } catch(NumberFormatException|ValidationException e) {res.sendError(400);}
         catch(SQLException e) {throw new ServletException(e);}
     }
 
@@ -48,6 +50,7 @@ public class AttractionController extends HttpServlet {
         String path=req.getRequestURI().substring(req.getContextPath().length());
         if(!path.equals("/admin/sync/tour")) {res.sendError(404);return;}
         if(!"ADMIN".equals(req.getSession().getAttribute("userRole"))) {res.sendError(403);return;}
+        if(!AppLifecycle.syncEnabled()){res.sendError(503,"동기화가 비활성화되어 있습니다.");return;}
         AppLifecycle.startTourSync();
         res.sendRedirect(req.getContextPath()+"/admin?sync=1");
     }

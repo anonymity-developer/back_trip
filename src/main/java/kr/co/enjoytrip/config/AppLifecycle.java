@@ -33,15 +33,16 @@ public class AppLifecycle implements ServletContextListener {
             } catch(SQLException e) {event.getServletContext().log("Admin bootstrap failed",e);}
         }
         scheduler=Executors.newScheduledThreadPool(2,r->{Thread t=new Thread(r,"enjoytrip-sync");t.setDaemon(true);return t;});
-        if(!AppConfig.get("ENJOYTRIP_TOUR_API_KEY").isEmpty())
+        if(syncEnabled()&&!AppConfig.get("ENJOYTRIP_TOUR_API_KEY").isEmpty())
             scheduler.scheduleAtFixedRate(ATTRACTIONS::syncAll,Duration.ofMinutes(2).toSeconds(),Duration.ofDays(1).toSeconds(),TimeUnit.SECONDS);
-        scheduler.scheduleAtFixedRate(NEWS::sync,Duration.ofMinutes(1).toSeconds(),Duration.ofDays(1).toSeconds(),TimeUnit.SECONDS);
+        if(syncEnabled())scheduler.scheduleAtFixedRate(NEWS::sync,Duration.ofMinutes(1).toSeconds(),Duration.ofDays(1).toSeconds(),TimeUnit.SECONDS);
     }
 
     public static void startTourSync() {
-        if(scheduler!=null) scheduler.execute(ATTRACTIONS::syncAll);
+        if(scheduler!=null&&syncEnabled()) scheduler.execute(ATTRACTIONS::syncAll);
     }
-    public static void startNewsSync(){if(scheduler!=null)scheduler.execute(NEWS::sync);}
+    public static void startNewsSync(){if(scheduler!=null&&syncEnabled())scheduler.execute(NEWS::sync);}
+    public static boolean syncEnabled(){return !"false".equalsIgnoreCase(AppConfig.get("ENJOYTRIP_SYNC_ENABLED"));}
 
     @Override public void contextDestroyed(ServletContextEvent event) {
         if(scheduler!=null) scheduler.shutdownNow();

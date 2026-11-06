@@ -17,6 +17,7 @@ public class AuthController extends HttpServlet {
     private final UserService users = new UserService();
 
     @Override protected void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
+        req.setAttribute("syncEnabled",kr.co.enjoytrip.config.AppLifecycle.syncEnabled());
         String path = path(req);
         try {
             switch (path) {
@@ -32,6 +33,7 @@ public class AuthController extends HttpServlet {
     }
 
     @Override protected void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
+        req.setAttribute("syncEnabled",kr.co.enjoytrip.config.AppLifecycle.syncEnabled());
         String path = path(req);
         try {
             switch (path) {

@@ -20,6 +20,7 @@ public class NewsController extends HttpServlet {
     @Override protected void doPost(HttpServletRequest req,HttpServletResponse res)throws IOException{
         if(!req.getServletPath().equals("/admin/sync/news")){res.sendError(404);return;}
         if(!"ADMIN".equals(req.getSession().getAttribute("userRole"))){res.sendError(403);return;}
+        if(!AppLifecycle.syncEnabled()){res.sendError(503,"동기화가 비활성화되어 있습니다.");return;}
         AppLifecycle.startNewsSync();res.sendRedirect(req.getContextPath()+"/admin");
     }
 }

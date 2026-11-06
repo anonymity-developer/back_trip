@@ -7,7 +7,7 @@
   <p class="muted"><c:out value="${attraction.address}"/></p>
   <c:if test="${not empty attraction.imageUrl}"><img class="detail-image" src="<c:out value='${attraction.imageUrl}'/>" alt="<c:out value='${attraction.title}'/>"></c:if>
   <c:if test="${not empty attraction.description}"><p class="post-body"><c:out value="${attraction.description}"/></p></c:if>
-  <p class="muted">출처: 한국관광공사 · 갱신: <c:out value="${attraction.sourceUpdatedAt}"/></p>
+  <p class="muted">출처: 한국관광공사 · 갱신: <c:choose><c:when test="${not empty attraction.sourceUpdatedAt}"><c:out value="${attraction.sourceUpdatedAt}"/></c:when><c:otherwise>원본 갱신 시각 미제공</c:otherwise></c:choose></p>
   <h2>지도에서 보기</h2>
   <c:choose>
     <c:when test="${not empty attraction.latitude and not empty attraction.longitude}">

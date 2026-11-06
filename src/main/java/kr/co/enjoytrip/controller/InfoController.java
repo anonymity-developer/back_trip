@@ -11,7 +11,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import kr.co.enjoytrip.dao.AttractionDao;
+import kr.co.enjoytrip.service.AttractionService;
 import kr.co.enjoytrip.config.AppLifecycle;
 import kr.co.enjoytrip.dto.AttractionDto;
 import kr.co.enjoytrip.service.InfoService;
@@ -19,14 +19,14 @@ import kr.co.enjoytrip.service.ValidationException;
 
 @WebServlet("/api/attractions/*")
 public class InfoController extends HttpServlet {
-    private final AttractionDao attractions=new AttractionDao();
+    private final AttractionService attractions=AppLifecycle.attractions();
     private final InfoService info=new InfoService();
     private final Gson gson=new Gson();
     @Override protected void doGet(HttpServletRequest req,HttpServletResponse res)throws ServletException,IOException{
         try{
             String[] parts=req.getPathInfo().substring(1).split("/");
             if(parts.length!=2){res.sendError(404);return;}
-            long id=Long.parseLong(parts[0]);AttractionDto attraction=attractions.find(id);
+            long id=Long.parseLong(parts[0]);AttractionDto attraction=attractions.findStored(id);
             if(attraction==null){res.sendError(404);return;}
             Object result;
             switch(parts[1]){

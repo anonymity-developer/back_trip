@@ -10,24 +10,17 @@
     <label>지역
       <select name="region">
         <option value="">전체 지역</option>
-        <option value="1" ${region == 1 ? 'selected' : ''}>서울</option><option value="2" ${region == 2 ? 'selected' : ''}>인천</option>
-        <option value="3" ${region == 3 ? 'selected' : ''}>대전</option><option value="4" ${region == 4 ? 'selected' : ''}>대구</option>
-        <option value="5" ${region == 5 ? 'selected' : ''}>광주</option><option value="6" ${region == 6 ? 'selected' : ''}>부산</option>
-        <option value="7" ${region == 7 ? 'selected' : ''}>울산</option><option value="8" ${region == 8 ? 'selected' : ''}>세종</option>
-        <option value="31" ${region == 31 ? 'selected' : ''}>경기</option><option value="32" ${region == 32 ? 'selected' : ''}>강원</option>
-        <option value="33" ${region == 33 ? 'selected' : ''}>충북</option><option value="34" ${region == 34 ? 'selected' : ''}>충남</option>
-        <option value="35" ${region == 35 ? 'selected' : ''}>경북</option><option value="36" ${region == 36 ? 'selected' : ''}>경남</option>
-        <option value="37" ${region == 37 ? 'selected' : ''}>전북</option><option value="38" ${region == 38 ? 'selected' : ''}>전남</option>
-        <option value="39" ${region == 39 ? 'selected' : ''}>제주</option>
+        <c:forEach var="item" items="${regions}">
+          <option value="${item.code}" ${region == item.code ? 'selected' : ''}><c:out value="${item.name}"/></option>
+        </c:forEach>
       </select>
     </label>
     <label>유형
       <select name="type">
         <option value="">전체 유형</option>
-        <option value="12" ${type == 12 ? 'selected' : ''}>관광지</option><option value="14" ${type == 14 ? 'selected' : ''}>문화시설</option>
-        <option value="15" ${type == 15 ? 'selected' : ''}>축제·공연</option><option value="25" ${type == 25 ? 'selected' : ''}>여행코스</option>
-        <option value="28" ${type == 28 ? 'selected' : ''}>레포츠</option><option value="32" ${type == 32 ? 'selected' : ''}>숙박</option>
-        <option value="38" ${type == 38 ? 'selected' : ''}>쇼핑</option><option value="39" ${type == 39 ? 'selected' : ''}>음식점</option>
+        <c:forEach var="item" items="${contentTypes}">
+          <option value="${item.code}" ${type == item.code ? 'selected' : ''}><c:out value="${item.name}"/></option>
+        </c:forEach>
       </select>
     </label>
     <label>검색어<input name="keyword" maxlength="100" placeholder="장소 이름을 입력하세요" value="<c:out value='${keyword}'/>"></label>

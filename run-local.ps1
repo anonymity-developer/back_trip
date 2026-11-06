@@ -1,11 +1,12 @@
 param(
     [string]$TomcatHome = 'C:\tools\app\apache-tomcat-11.0.26',
-    [ValidateRange(1, 65535)][int]$Port = 8080
+    [ValidateRange(1, 65535)][int]$Port = 8080,
+    [string]$EnvFile = '.env'
 )
 
 $ErrorActionPreference = 'Stop'
 $projectRoot = $PSScriptRoot
-$envFile = Join-Path $projectRoot '.env'
+$envFile = if ([System.IO.Path]::IsPathRooted($EnvFile)) { $EnvFile } else { Join-Path $projectRoot $EnvFile }
 $warFile = Join-Path $projectRoot 'target\enjoytrip.war'
 $tomcatBase = Join-Path $projectRoot "target\local-tomcat-$Port"
 
