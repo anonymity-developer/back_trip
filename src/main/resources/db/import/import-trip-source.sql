@@ -62,9 +62,9 @@ BEGIN
   -- Existing source_updated_at is never synthesized or overwritten by this snapshot.
   UPDATE attractions a JOIN import_candidates s ON s.content_id=a.content_id
     JOIN import_original_ids old ON old.content_id=a.content_id
-  SET a.address=COALESCE(NULLIF(TRIM(a.address),''),s.address),
-      a.description=COALESCE(NULLIF(TRIM(a.description),''),s.description),
-      a.image_url=COALESCE(NULLIF(TRIM(a.image_url),''),s.image_url),
+  SET a.address=CASE WHEN a.address IS NULL OR TRIM(a.address)='' THEN s.address ELSE a.address END,
+      a.description=CASE WHEN a.description IS NULL OR TRIM(a.description)='' THEN s.description ELSE a.description END,
+      a.image_url=CASE WHEN a.image_url IS NULL OR TRIM(a.image_url)='' THEN s.image_url ELSE a.image_url END,
       a.sigungu_code=CASE WHEN a.sigungu_code IS NULL AND a.area_code=s.area_code THEN s.sigungu_code ELSE a.sigungu_code END;
   SET filled_count=ROW_COUNT();
   -- Treat coordinates as a pair; do not mix a retained coordinate with a different source point.

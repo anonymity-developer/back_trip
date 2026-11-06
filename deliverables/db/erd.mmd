@@ -1,0 +1,120 @@
+erDiagram
+    sidos ||--o{ guguns : sido_code
+    sidos ||--o{ attractions : area_code
+    guguns o|--o{ attractions : area_sigungu
+    contenttypes ||--o{ attractions : content_type
+    attractions ||--o{ attraction_images : CASCADE
+    users ||--o{ plans : CASCADE
+    plans ||--o{ plan_stops : CASCADE
+    attractions ||--o{ plan_stops : RESTRICT
+    users ||--o{ hot_places : CASCADE
+    users ||--o{ posts : CASCADE
+    users ||--o{ password_reset_requests : user_id_CASCADE
+    users o|--o{ password_reset_requests : processed_by_SET_NULL
+    users {
+        BIGINT id PK
+        VARCHAR login_id UK
+        VARCHAR email UK
+        VARCHAR name
+        VARCHAR password_hash
+        ENUM role
+        BOOLEAN must_change_password
+        TIMESTAMP created_at
+    }
+    sidos {
+        INT no PK
+        INT sido_code UK
+        VARCHAR sido_name
+    }
+    guguns {
+        INT no PK
+        INT sido_code FK
+        INT gugun_code
+        VARCHAR gugun_name
+    }
+    contenttypes {
+        INT content_type_id PK
+        VARCHAR content_type_name
+    }
+    attractions {
+        BIGINT id PK
+        BIGINT content_id UK
+        VARCHAR title
+        INT content_type FK
+        INT area_code FK
+        INT sigungu_code FK
+        VARCHAR address
+        TEXT description
+        DECIMAL latitude
+        DECIMAL longitude
+        VARCHAR image_url
+        VARCHAR source_updated_at
+        TIMESTAMP synced_at
+    }
+    attraction_images {
+        BIGINT id PK
+        BIGINT attraction_id FK
+        VARCHAR image_url
+        VARCHAR credit
+        INT display_order
+    }
+    plans {
+        BIGINT id PK
+        BIGINT user_id FK
+        VARCHAR title
+        DATE start_date
+        DATE end_date
+        DECIMAL budget
+        TEXT details
+        BOOLEAN is_public
+        TIMESTAMP created_at
+        TIMESTAMP updated_at
+    }
+    plan_stops {
+        BIGINT id PK
+        BIGINT plan_id FK
+        BIGINT attraction_id FK
+        DATE visit_date
+        INT stop_order
+        DECIMAL budget
+        VARCHAR memo
+    }
+    hot_places {
+        BIGINT id PK
+        BIGINT user_id FK
+        VARCHAR title
+        VARCHAR place_name
+        VARCHAR place_type
+        DATE visited_on
+        TEXT description
+        DECIMAL latitude
+        DECIMAL longitude
+        VARCHAR image_path
+        TIMESTAMP created_at
+        TIMESTAMP updated_at
+    }
+    news {
+        BIGINT id PK
+        VARCHAR title
+        VARCHAR source
+        VARCHAR source_url
+        DATETIME published_at
+        TIMESTAMP collected_at
+    }
+    posts {
+        BIGINT id PK
+        BIGINT user_id FK
+        ENUM kind
+        VARCHAR title
+        TEXT body
+        TIMESTAMP created_at
+        TIMESTAMP updated_at
+    }
+    password_reset_requests {
+        BIGINT id PK
+        BIGINT user_id FK
+        ENUM status
+        TIMESTAMP requested_at
+        TIMESTAMP processed_at
+        BIGINT processed_by FK
+    }

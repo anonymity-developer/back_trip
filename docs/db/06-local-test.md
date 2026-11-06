@@ -120,7 +120,7 @@ Remove-Item Env:ENJOYTRIP_DB_TEST
 python scripts/db/http-smoke.py --base-url http://127.0.0.1:18080/enjoytrip
 ```
 
-정상 결과는 4개 `PASS` 줄과 종료 코드 0이다. 검색·응답 건수, CSRF·관리자/작성자 권한, 비공개 계획, 순서 변경, 파일 업로드·삭제, 탈퇴 연쇄 삭제를 포함한다. 외부 키가 비어 있어 날씨 API의 503은 이 검증에서 예상한 결과다.
+정상 결과는 5개 `PASS` 줄과 종료 코드 0이다. 검색·응답 건수, CSRF·관리자/작성자 권한, 비공개 계획, 순서 변경, 파일 업로드·수정·삭제, 관리자 비밀번호 초기화·강제 변경, 탈퇴 연쇄 삭제를 포함한다. 외부 키가 비어 있어 날씨 API의 503은 이 검증에서 예상한 결과다.
 
 브라우저에서 직접 확인할 순서는 다음과 같다.
 
@@ -136,7 +136,38 @@ python scripts/db/http-smoke.py --base-url http://127.0.0.1:18080/enjoytrip
 
 테스트 데이터·DB를 유지한 채 화면 테스트를 계속할 수 있다. 종료는 앱 실행 창의 Ctrl+C다. 개발자가 남긴 자동 검증 인스턴스가 18080을 사용 중이면 먼저 종료하거나 `-Port 18081`로 시작하고 모든 URL·HTTP 스크립트의 포트를 동일하게 바꾼다.
 
-## 6. 검증 인스턴스 종료
+## 6. 선택적 시연 데이터
+
+테스트 앱을 한 번 실행해 `admin_verify`가 생성된 후 실행한다. `enjoytrip_test`에만 공개 계획·방문지 2개·공지·게시글을 만들고, 다시 실행해도 같은 시연 자료를 중복 생성하지 않는다.
+
+```powershell
+python scripts/db/run-sql.py --port 13307 --file src/main/resources/db/seed/demo-data.sql
+```
+
+출력된 `public_demo_plan_id`를 `/enjoytrip/plans/{id}`에서 조회한다. 관리자 로그인 정보는 `target/db/app.env`에 있다. Hot Place는 실제 사진 파일이 필요하므로 SQL로 존재하지 않는 파일 경로를 만들지 않고 화면에서 업로드한다.
+
+## 7. 백업·복원 연습
+
+앱·동기화를 중지한 검증 인스턴스 기준이다. PowerShell의 텍스트 리다이렉션으로 덤프 인코딩을 바꾸지 않도록 `--result-file`을 사용한다. 아래 계정은 격리 인스턴스의 root이며 실제 환경은 맞는 계정·인증을 사용한다.
+
+```powershell
+& 'C:/Program Files/MySQL/MySQL Server 8.0/bin/mysqldump.exe' --no-defaults --host=127.0.0.1 --port=13307 --user=root --single-transaction --set-gtid-purged=OFF --no-tablespaces --default-character-set=utf8mb4 --result-file=target/db/manual-backup.sql enjoytrip_test
+python -c "from pathlib import Path; Path('target/db/restore-manual.sql').write_bytes(b'CREATE DATABASE enjoytrip_restore_manual CHARACTER SET utf8mb4; USE enjoytrip_restore_manual;\n' + Path('target/db/manual-backup.sql').read_bytes())"
+python scripts/db/run-sql.py --port 13307 --file target/db/restore-manual.sql
+```
+
+이미 `enjoytrip_restore_manual`이 있으면 새 이름을 사용한다. CREATE 실패를 무시하고 실행하지 않는다. Workbench에서 원본·복원의 12개 테이블 건수와 다음 매핑을 대조한다.
+
+```sql
+SELECT id,content_id,title FROM enjoytrip_test.attractions ORDER BY id;
+SELECT id,content_id,title FROM enjoytrip_restore_manual.attractions ORDER BY id;
+SELECT id,plan_id,attraction_id,stop_order FROM enjoytrip_test.plan_stops ORDER BY id;
+SELECT id,plan_id,attraction_id,stop_order FROM enjoytrip_restore_manual.plan_stops ORDER BY id;
+```
+
+실제 장애 복구에는 DB뿐 아니라 같은 시점의 업로드 디렉터리·이전 WAR·설정도 필요하다. 사진이 있는 환경은 앱 중지 후 업로드 디렉터리를 별도 복사하고 복원 설정의 경로를 맞춘다. 이번 실제 복원 연습은 최종 테스트 DB와 계획·관광지 매핑까지이며, 별도 사진 파일이 있는 운영 환경의 복구까지 검증한 것은 아니다. 백업에는 계정 해시 등이 있으므로 `target/` 밖으로 커밋하지 않는다.
+
+## 8. 검증 인스턴스 종료
 
 ```powershell
 & 'C:/Program Files/MySQL/MySQL Server 8.0/bin/mysqladmin.exe' --no-defaults --host=127.0.0.1 --port=13307 --user=root shutdown

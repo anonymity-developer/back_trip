@@ -68,6 +68,7 @@ def main():
     other = Browser(base)
     admin = Browser(base)
     created = []
+    accounts = {}
     password = secrets.token_hex(16)
     today = date.today().isoformat()
     try:
@@ -78,6 +79,7 @@ def main():
             browser.request('/login', {'csrf': browser.csrf(), 'loginId': login, 'password': password})
             browser.request('/me')
             created.append(browser)
+            accounts[browser] = (login, login + '@example.test')
         member.post('/me', {'email': 'updated_' + secrets.token_hex(4) + '@example.test', 'name': 'DB 수정 회원'})
         member.request('/logout', {}, expected=403)
         member.request('/admin', expected=403)
@@ -102,6 +104,7 @@ def main():
         post = int(re.search(r'/posts/(\d+)', listing).group(1))
         detail, _ = guest.request(f'/posts/{post}')
         assert '&lt;script&gt;test&lt;/script&gt;' in detail
+        member.post(f'/posts/{post}/edit', {'title': 'DB 수정 게시글', 'body': '수정 확인'})
         other.post(f'/posts/{post}/delete', {}, expected=403)
         print('PASS: signup/login/profile, CSRF, member permissions, plan stops/order, private visibility, board escaping/ownership')
 
@@ -116,6 +119,8 @@ def main():
         hot = int(re.search(r'/hot-places/(\d+)$', url).group(1))
         guest.request(f'/photos/{hot}')
         other.post(f'/hot-places/{hot}/delete', {}, expected=400)
+        member.request(f'/hot-places/{hot}/edit', raw=body, content_type='multipart/form-data; boundary=' + boundary)
+        guest.request(f'/photos/{hot}')
         member.post(f'/hot-places/{hot}/delete', {})
         guest.request(f'/photos/{hot}', expected=404)
 
@@ -126,8 +131,21 @@ def main():
         admin.post('/admin/sync/news', {}, expected=503)
         admin.post('/notices/new', {'title': 'DB 검증 공지', 'body': '검증'})
         notice = int(re.search(r'/notices/(\d+)', admin.request('/notices')[0]).group(1))
+        admin.post(f'/notices/{notice}/edit', {'title': 'DB 수정 공지', 'body': '수정 확인'})
         admin.post(f'/notices/{notice}/delete', {})
+        guest.request('/password-reset', {'csrf': guest.csrf('/password-reset'), 'email': accounts[other][1]})
+        reset_id = int(re.search(r'/admin/password-resets/(\d+)/complete', admin.request('/admin')[0]).group(1))
+        reset_page, _ = admin.post(f'/admin/password-resets/{reset_id}/complete', {})
+        temporary = re.search(r'임시 비밀번호: <strong>([^<]+)</strong>', reset_page).group(1)
+        repeated, _ = admin.post(f'/admin/password-resets/{reset_id}/complete', {})
+        assert '처리할 수 없는 요청' in repeated
+        other.post('/logout', {})
+        _, changed_url = other.request('/login', {'csrf': other.csrf(), 'loginId': accounts[other][0], 'password': temporary})
+        assert changed_url.endswith('/password-change')
+        other.post('/password-change', {'oldPassword': temporary, 'newPassword': password})
+        other.request('/me')
         print('PASS: photo upload/read/delete, administrator notice, private plan protection, paused manual sync')
+        print('PASS: password reset request/admin completion, repeated completion rejection, forced password change')
     finally:
         for browser in reversed(created):
             browser.post('/me/delete', {'password': password})

@@ -1,0 +1,139 @@
+CREATE DATABASE IF NOT EXISTS enjoytrip CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE enjoytrip;
+
+CREATE TABLE IF NOT EXISTS users (
+  id BIGINT PRIMARY KEY AUTO_INCREMENT,
+  login_id VARCHAR(50) NOT NULL UNIQUE,
+  email VARCHAR(255) NOT NULL UNIQUE,
+  name VARCHAR(80) NOT NULL,
+  password_hash VARCHAR(255) NOT NULL,
+  role ENUM('USER','ADMIN') NOT NULL DEFAULT 'USER',
+  must_change_password BOOLEAN NOT NULL DEFAULT FALSE,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS sidos (
+  no INT PRIMARY KEY AUTO_INCREMENT,
+  sido_code INT NOT NULL UNIQUE,
+  sido_name VARCHAR(20)
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS guguns (
+  no INT PRIMARY KEY AUTO_INCREMENT,
+  sido_code INT NOT NULL,
+  gugun_code INT NOT NULL,
+  gugun_name VARCHAR(20),
+  UNIQUE KEY uq_guguns_sido_code (sido_code, gugun_code),
+  CONSTRAINT fk_gugun_sido FOREIGN KEY (sido_code) REFERENCES sidos(sido_code)
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS contenttypes (
+  content_type_id INT PRIMARY KEY,
+  content_type_name VARCHAR(45)
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS attractions (
+  id BIGINT PRIMARY KEY AUTO_INCREMENT,
+  content_id BIGINT NOT NULL UNIQUE,
+  title VARCHAR(255) NOT NULL,
+  content_type INT NOT NULL,
+  area_code INT NOT NULL,
+  sigungu_code INT,
+  address VARCHAR(500),
+  description TEXT,
+  latitude DECIMAL(11,8),
+  longitude DECIMAL(11,8),
+  image_url VARCHAR(1000),
+  source_updated_at VARCHAR(30),
+  synced_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  CONSTRAINT fk_attraction_sido FOREIGN KEY (area_code) REFERENCES sidos(sido_code),
+  CONSTRAINT fk_attraction_type FOREIGN KEY (content_type) REFERENCES contenttypes(content_type_id),
+  CONSTRAINT fk_attraction_gugun FOREIGN KEY (area_code, sigungu_code) REFERENCES guguns(sido_code, gugun_code),
+  INDEX idx_attractions_filter (area_code, content_type, title)
+);
+
+CREATE TABLE IF NOT EXISTS attraction_images (
+  id BIGINT PRIMARY KEY AUTO_INCREMENT,
+  attraction_id BIGINT NOT NULL,
+  image_url VARCHAR(1000) NOT NULL,
+  credit VARCHAR(255),
+  display_order INT NOT NULL DEFAULT 0,
+  CONSTRAINT fk_image_attraction FOREIGN KEY (attraction_id) REFERENCES attractions(id) ON DELETE CASCADE,
+  UNIQUE KEY uq_attraction_image (attraction_id, image_url(255))
+);
+
+CREATE TABLE IF NOT EXISTS plans (
+  id BIGINT PRIMARY KEY AUTO_INCREMENT,
+  user_id BIGINT NOT NULL,
+  title VARCHAR(200) NOT NULL,
+  start_date DATE NOT NULL,
+  end_date DATE NOT NULL,
+  budget DECIMAL(12,2) NOT NULL DEFAULT 0,
+  details TEXT,
+  is_public BOOLEAN NOT NULL DEFAULT FALSE,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  CONSTRAINT fk_plan_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS plan_stops (
+  id BIGINT PRIMARY KEY AUTO_INCREMENT,
+  plan_id BIGINT NOT NULL,
+  attraction_id BIGINT NOT NULL,
+  visit_date DATE NOT NULL,
+  stop_order INT NOT NULL,
+  budget DECIMAL(12,2) NOT NULL DEFAULT 0,
+  memo VARCHAR(1000),
+  CONSTRAINT fk_stop_plan FOREIGN KEY (plan_id) REFERENCES plans(id) ON DELETE CASCADE,
+  CONSTRAINT fk_stop_attraction FOREIGN KEY (attraction_id) REFERENCES attractions(id),
+  UNIQUE KEY uq_stop_order (plan_id, visit_date, stop_order)
+);
+
+CREATE TABLE IF NOT EXISTS hot_places (
+  id BIGINT PRIMARY KEY AUTO_INCREMENT,
+  user_id BIGINT NOT NULL,
+  title VARCHAR(200) NOT NULL,
+  place_name VARCHAR(200) NOT NULL,
+  place_type VARCHAR(80) NOT NULL,
+  visited_on DATE NOT NULL,
+  description TEXT NOT NULL,
+  latitude DECIMAL(11,8),
+  longitude DECIMAL(11,8),
+  image_path VARCHAR(255),
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  CONSTRAINT fk_hot_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS news (
+  id BIGINT PRIMARY KEY AUTO_INCREMENT,
+  title VARCHAR(500) NOT NULL,
+  source VARCHAR(100) NOT NULL,
+  source_url VARCHAR(1000) NOT NULL,
+  published_at DATETIME,
+  collected_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY uq_news_url (source_url(255))
+);
+
+CREATE TABLE IF NOT EXISTS posts (
+  id BIGINT PRIMARY KEY AUTO_INCREMENT,
+  user_id BIGINT NOT NULL,
+  kind ENUM('NOTICE','BOARD') NOT NULL,
+  title VARCHAR(200) NOT NULL,
+  body TEXT NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  CONSTRAINT fk_post_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  INDEX idx_posts_kind_created (kind, created_at)
+);
+
+CREATE TABLE IF NOT EXISTS password_reset_requests (
+  id BIGINT PRIMARY KEY AUTO_INCREMENT,
+  user_id BIGINT NOT NULL,
+  status ENUM('PENDING','COMPLETED') NOT NULL DEFAULT 'PENDING',
+  requested_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  processed_at TIMESTAMP NULL,
+  processed_by BIGINT NULL,
+  CONSTRAINT fk_reset_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  CONSTRAINT fk_reset_admin FOREIGN KEY (processed_by) REFERENCES users(id) ON DELETE SET NULL
+);
