@@ -1,4 +1,3 @@
--- Active: 1793240841926@@127.0.0.1@3306@enjoytrip
 CREATE DATABASE IF NOT EXISTS enjoytrip CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE enjoytrip;
 
@@ -12,6 +11,26 @@ CREATE TABLE IF NOT EXISTS users (
   must_change_password BOOLEAN NOT NULL DEFAULT FALSE,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE IF NOT EXISTS sidos (
+  no INT PRIMARY KEY AUTO_INCREMENT,
+  sido_code INT NOT NULL UNIQUE,
+  sido_name VARCHAR(20)
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS guguns (
+  no INT PRIMARY KEY AUTO_INCREMENT,
+  sido_code INT NOT NULL,
+  gugun_code INT NOT NULL,
+  gugun_name VARCHAR(20),
+  UNIQUE KEY uq_guguns_sido_code (sido_code, gugun_code),
+  CONSTRAINT fk_gugun_sido FOREIGN KEY (sido_code) REFERENCES sidos(sido_code)
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS contenttypes (
+  content_type_id INT PRIMARY KEY,
+  content_type_name VARCHAR(45)
+) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS attractions (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
@@ -27,6 +46,9 @@ CREATE TABLE IF NOT EXISTS attractions (
   image_url VARCHAR(1000),
   source_updated_at VARCHAR(30),
   synced_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  CONSTRAINT fk_attraction_sido FOREIGN KEY (area_code) REFERENCES sidos(sido_code),
+  CONSTRAINT fk_attraction_type FOREIGN KEY (content_type) REFERENCES contenttypes(content_type_id),
+  CONSTRAINT fk_attraction_gugun FOREIGN KEY (area_code, sigungu_code) REFERENCES guguns(sido_code, gugun_code),
   INDEX idx_attractions_filter (area_code, content_type, title)
 );
 
