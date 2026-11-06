@@ -2,7 +2,7 @@
 
 구현이 시작되었다. 현재 상태는 [개발 진행 기록](05-progress.md), 직접 실행 방법은 [로컬 테스트 안내](06-local-test.md)를 따른다. 아래의 분석·계획 설명과 ‘변경하지 않았다’는 표현은 최초 계획 수립 시점의 기록이다.
 
-2026-11-06 기준 분석·설계 문서다. `temp/자바전공_enjoytrip_16_06_DB.pdf`와 제공 ERD·SQL을 기존 Servlet/JSP·JDBC 프로젝트에 연계하기 위한 계획이며, **이번 작업에서는 애플리케이션 코드, SQL 파일, DB를 변경하지 않았다.** 아래의 구현 단계와 SQL 검증은 후속 작업이다.
+2026-11-06 기준 분석·설계 문서다. `temp/database-requirements.pdf`와 제공 ERD·SQL을 기존 Servlet/JSP·JDBC 프로젝트에 연계하기 위한 계획이며, **이번 작업에서는 애플리케이션 코드, SQL 파일, DB를 변경하지 않았다.** 아래의 구현 단계와 SQL 검증은 후속 작업이다.
 
 ## 개발 목표와 현재 상태
 
@@ -40,9 +40,9 @@ DB 명세서의 중심은 기존 기능의 재작성보다 관계형 모델·정
 
 질문과 판단 조건의 원본은 [확인 목록](01-requirements.md#확인-필요-사항과-진행-조건)에 있다. Q1~Q4는 사용자 답변과 명세 대조를 반영했다. 충돌 시 기존 ID·비어 있지 않은 값 유지 및 39번 명칭 보정은 승인 후 구현했다. 검증 환경도 MySQL 8.0.46·별도 포트 13307로 확인했다.
 
-남은 확인은 실제 환경 적용 시 DB·파일 상태와 외부 API 키·승인·응답, 최종 GitLab 제출 규칙이다. SGIS·구군 검색 등의 별도 지시가 없다면 기존 기능을 유지한다.
+남은 확인은 실제 환경 적용 시 DB·파일 상태와 외부 API 키·승인·응답, 배포 환경별 설정이다. SGIS·구군 검색 등의 별도 지시가 없다면 기존 기능을 유지한다.
 
-초기 개발은 격리 DB에서 검증했다. 이후 사용자 요청으로 루트 `.env` 하나에 통합하고 기본 DB에 앱 테이블·관광지·시연 데이터를 적용했다. 기존 `members`는 보존했다. 현재 실행 방법은 [로컬 테스트](06-local-test.md), 전체 산출물은 [DB 제출 자료](../../deliverables/db/README.md)를 따른다. GitLab 업로드는 수행하지 않았다.
+초기 개발은 격리 DB에서 검증했다. 이후 사용자 요청으로 루트 `.env` 하나에 통합하고 기본 DB에 앱 테이블·관광지·시연 데이터를 적용했다. 기존 `members`는 보존했다. 현재 실행 방법은 [로컬 테스트](06-local-test.md), 전체 산출물은 [DB 제출 자료](../../deliverables/db/README.md)를 따른다. 원격 배포는 수행하지 않았다.
 
 ## 권장 구현 순서
 
@@ -50,8 +50,8 @@ DB 명세서의 중심은 기존 기능의 재작성보다 관계형 모델·정
 
 ## 분석 근거
 
-- 기존 명세: [`자바전공_enjoytrip_16_05_백엔드.pdf`](../../temp/자바전공_enjoytrip_16_05_백엔드.pdf), 기존 설계·계획·기록: [`docs/back/`](../back/README.md).
-- 신규 명세: [`자바전공_enjoytrip_16_06_DB.pdf`](../../temp/자바전공_enjoytrip_16_06_DB.pdf), [`trip-schema.sql`](../../temp/trip-schema.sql), [`trip-dump.sql`](../../temp/trip-dump.sql), [`trip-erd.png`](../../temp/trip-erd.png).
+- 기존 명세: [`backend-requirements.pdf`](../../temp/backend-requirements.pdf), 기존 설계·계획·기록: [`docs/back/`](../back/README.md).
+- 신규 명세: [`database-requirements.pdf`](../../temp/database-requirements.pdf), [`trip-schema.sql`](../../temp/trip-schema.sql), [`trip-dump.sql`](../../temp/trip-dump.sql), [`trip-erd.png`](../../temp/trip-erd.png).
 - 실제 구현: [`pom.xml`](../../pom.xml), [`src/main/java/kr/co/enjoytrip/`](../../src/main/java/kr/co/enjoytrip/), [`schema.sql`](../../src/main/resources/schema.sql), [`WEB-INF/views/`](../../src/main/webapp/WEB-INF/views/), [`src/test/`](../../src/test/).
 - 기존 제출 자료: [`deliverables/back/`](../../deliverables/back/README.md). 제공 ERD의 네 테이블만으로 전체 서비스 모델이 완성되었다고 보지 않는다.
 

@@ -15,11 +15,11 @@ Invoke-RestMethod http://127.0.0.1:18080/enjoytrip/health
 앱이 꺼졌다면 JDK를 지정하고 다음처럼 시작한다. 18080 대신 기본 8080을 쓰려면 `-Port`를 생략하고 접속 URL도 8080으로 바꾼다.
 
 ```powershell
-$env:JAVA_HOME='C:/tools/app/sts-5.4.0.RELEASE/plugins/org.eclipse.justj.openjdk.hotspot.jre.full.win32.x86_64_25.0.4.v20260826-0822/jre'
+$env:JAVA_HOME='C:/tools/jdk-21'
 .\run-local.ps1 -Port 18080
 ```
 
-위 경로는 현재 설치된 Java 25 JDK다. Java 21 이상의 다른 JDK가 있으면 그 경로를 사용한다. 프로젝트는 Java 21 대상으로 컴파일한다. PATH의 Java 8은 사용할 수 없다.
+위 경로는 예시이므로 실제 설치한 Java 21 이상 JDK의 경로를 사용한다. 프로젝트는 Java 21 대상으로 컴파일한다. PATH의 Java 8은 사용할 수 없다.
 
 ## 1. 공통 설정과 서버 상태
 
@@ -65,7 +65,7 @@ python scripts/db/run-sql.py --file src/main/resources/db/migrations/001-db-exte
 
 ## 3. 제공 원본과 관광지 적재
 
-**현재 데이터는 이미 준비되어 있다.** 새 환경에서만 원본 두 SQL을 `temp/`에 준비하고 다음 순서로 적재한다. 별도 설정 파일은 만들지 않는다.
+**현재 데이터는 이미 준비되어 있다.** 새 환경에서만 원본 두 SQL을 `temp/trip-schema.sql`, `temp/trip-dump.sql`로 준비하고 다음 순서로 적재한다. 파일명이 다르면 `prepare-source.py`의 `--schema-file`, `--dump-file`로 경로를 지정한다. 별도 설정 파일은 만들지 않는다.
 
 ```powershell
 python scripts/db/prepare-source.py

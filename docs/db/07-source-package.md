@@ -1,8 +1,8 @@
 # dbtrip 소스코드
 
- 개발자·사용자의 EnjoyTrip DB 프로젝트 소스다. Servlet/JSP·JDBC·MySQL로 관광지 탐색, 회원·인증, 여행 계획, Hot Place, 뉴스와 커뮤니티를 구현한다.
+EnjoyTrip 소스코드다. Servlet/JSP·JDBC·MySQL로 관광지 탐색, 회원·인증, 여행 계획, Hot Place, 뉴스와 커뮤니티를 구현한다.
 
-이 소스 ZIP에는 Maven 프로젝트와 실행·테스트에 필요한 파일만 들어 있다. DB 제출 문서·MWB·전체 데이터 SQL·ERD·실행 화면은 별도의 `EnjoyTrip_db.zip`에 있다. 이전 back 산출물·개발 문서·빌드 결과는 포함하지 않는다.
+배포 ZIP의 `dbtrip/`은 Maven 프로젝트와 실행·테스트 파일을 담는다. DB 모델·전체 데이터 SQL·ERD·서비스 소개·실행 화면은 같은 ZIP의 최상위에 있다.
 
 ## 구성
 
@@ -20,7 +20,7 @@ dbtrip/
 ## 실행
 
 1. Java 21 이상의 JDK, MySQL 8, Tomcat 11을 준비하고 `JAVA_HOME`을 지정한다.
-2. DB 산출물 ZIP의 `EnjoyTrip_db.sql`을 새 빈 환경에 실행한다. 기본 DB는 `enjoytrip`이며 기준정보·공개 관광지 데이터를 포함한다. 기존 DB는 백업 후 별도 업그레이드 절차를 따른다.
+2. 상위 폴더의 `EnjoyTrip_db.sql`을 새 빈 환경에 실행한다. 기본 DB는 `enjoytrip`이며 기준정보·공개 관광지 데이터를 포함한다. 기존 DB는 백업 후 별도 업그레이드 절차를 따른다.
 3. 이 소스의 `.env.example`을 `.env`로 복사하고 DB 접속·관리자 계정·업로드 디렉터리와 사용할 API 키를 설정한다. 실제 `.env`는 제출에 포함하지 않았다.
 4. 이 폴더에서 실행한다.
 
@@ -45,4 +45,4 @@ python scripts/db/http-smoke.py --base-url http://127.0.0.1:8080/enjoytrip
 
 기본 테스트는 8건 통과·DB 통합 1건 생략, 통합 실행은 9건 통과가 기대값이다. DAO 테스트는 같은 설정에서 테스트 DB명만 `enjoytrip_test`로 바꿔 사용한다. HTTP 검증은 실행 중인 앱에 임시 회원·콘텐츠를 만들고 정리하며 PASS 5개가 기대값이다.
 
-이 소스에는 `.git`·`bin`·`target`·실제 `.env`·로그·개인 업로드를 포함하지 않았다. 서비스 소개·화면·모델 설명과 실제 제출 절차는 함께 제공한 DB 산출물 ZIP의 README를 확인한다.
+이 소스에는 `.git`·`bin`·`target`·실제 `.env`·로그·개인 업로드를 포함하지 않았다. 서비스 소개·화면·모델 설명과 실행 안내는 상위 폴더의 README를 확인한다.

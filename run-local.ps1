@@ -1,5 +1,5 @@
 param(
-    [string]$TomcatHome = 'C:\tools\app\apache-tomcat-11.0.26',
+    [string]$TomcatHome = (Join-Path (Split-Path (Split-Path $PSScriptRoot -Parent) -Parent) 'app\apache-tomcat-11.0.26'),
     [ValidateRange(1, 65535)][int]$Port = 8080
 )
 

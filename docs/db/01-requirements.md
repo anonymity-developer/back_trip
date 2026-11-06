@@ -2,7 +2,7 @@
 
 ## 근거와 범위
 
-분석 기준일은 2026-11-06이다. 원본 경로는 [README의 분석 근거](README.md#분석-근거)를 따른다. 이하 ‘신규 PDF’는 `자바전공_enjoytrip_16_06_DB.pdf`, ‘기존 PDF’는 `자바전공_enjoytrip_16_05_백엔드.pdf`다.
+분석 기준일은 2026-11-06이다. 원본 경로는 [README의 분석 근거](README.md#분석-근거)를 따른다. 이하 ‘신규 PDF’는 `database-requirements.pdf`, ‘기존 PDF’는 `backend-requirements.pdf`다.
 
 | 근거 | 명시 사항 | 이번 계획의 해석 |
 | --- | --- | --- |
@@ -82,7 +82,7 @@ ERD 이미지의 네 엔티티·컬럼과 제공 Schema의 구조는 대응한�
 
 | 항목 | 확인 사실 | 필요한 처리·결정 |
 | --- | --- | --- |
-| DB 이름 | Schema와 Dump 본문은 `trip_source`, Dump 헤더 주석은 `trip_source`, 기존 앱은 `enjoytrip` | 실제 `CREATE/USE`를 기준으로 경로 결정. 연결 URL만 바꿔도 호환된다고 보지 않는다. |
+| DB 이름 | 원본 스키마 식별자는 로더에서 `trip_source`로 정규화하고 기존 앱은 `enjoytrip`을 유지 | 원본 파일은 보존하고 생성한 로더의 `CREATE/USE`와 변환 SQL을 함께 확인한다. 연결 URL만 바꿔도 호환된다고 보지 않는다. |
 | 원본 실행 특성 | Schema는 관광지 네 테이블 DROP 포함, Dump는 DDL 없이 컬럼 목록 없는 INSERT·LOCK TABLES·세션 검사 해제/복구 사용 | 기존 DB에 원본 직접 실행 금지라는 설계 제안. 격리 인스턴스에서 순서·테이블 폭·권한 확인 후 적재한다. |
 | 구군 관계 | `gugun_code`는 비고유 인덱스, 같은 코드가 여러 시도에 존재(중복 코드 그룹 25개). `(sido_code,gugun_code)` 중복은 0 | 구군 단독 코드를 전역 고유값으로 만들면 안 된다. Q1 답변에 따라 B안의 복합 UNIQUE·FK 보완 설계에 반영한다. |
 | 관광지 ID | 원본 PK `no INT`, 기존 PK `id BIGINT`; 원본 `content_id`는 nullable·비고유, 기존은 NOT NULL UNIQUE | `no=id=content_id`로 간주 금지. 제공 덤프의 `content_id` 중복·NULL은 각각 0이지만 이후 API 데이터까지 보장하는 제약은 아니다. |

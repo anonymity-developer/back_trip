@@ -54,7 +54,7 @@
 
 1. [검증 계획](04-test-plan.md)의 시나리오와 모바일·데스크톱 화면을 확인한다. DB 초기화부터 관리자 생성·데이터 수집·회원 사용 흐름까지 새 환경에서 재현한다.
 2. README의 실행 절차를 검증하고, 최종 요구사항 목록·Usecase/Class Diagram·소스코드·실행 화면 캡처를 정리한다.
-3. `git status`와 `git check-ignore temp/자바전공_enjoytrip_16_05_백엔드.pdf`로 제외 대상과 제출 대상을 확인한다.
+3. `git status`와 `git check-ignore temp/backend-requirements.pdf`로 제외 대상과 제출 대상을 확인한다.
 
 **완료:** 요구사항별 검증 결과와 실행 화면을 남기고, 공개 저장소에 비밀값·`temp/`·빌드 산출물이 포함되지 않는다.
 

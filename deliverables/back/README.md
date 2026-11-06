@@ -25,7 +25,7 @@
 
 ## 실행 방법
 
-1. **Java 21, MySQL 8, Tomcat 11**을 준비한다. Windows 기본 스크립트는 `C:\tools\app\apache-tomcat-11.0.26`을 사용하며, 다른 위치라면 `run-local.ps1 -TomcatHome '설치 경로'`를 지정한다.
+1. **Java 21, MySQL 8, Tomcat 11**을 준비한다. Windows 실행 시 `run-local.ps1 -TomcatHome 'Tomcat 설치 경로'`를 지정한다.
 2. MySQL에서 [`schema.sql`](reference/schema.sql)을 실행해 `enjoytrip` DB와 테이블을 만든다.
 3. [`.env.example`](reference/.env.example)을 복사해 프로젝트 루트의 `.env`를 만들고 DB 사용자·비밀번호, 관리자 초기 계정, 사용할 외부 API 키, 사진 저장 경로를 입력한다. `.env`는 Git에 포함하지 않는다. **카카오 키는 필요 없다.**
 4. 프로젝트 루트 PowerShell에서 다음을 실행한다. 8080 포트가 비어 있어야 한다.

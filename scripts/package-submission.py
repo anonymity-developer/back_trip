@@ -1,4 +1,4 @@
-"""Build separate DB deliverables and runnable source ZIPs; never include prior back deliverables."""
+"""Bundle DB documentation and the runnable dbtrip source in one release ZIP."""
 import argparse
 from pathlib import Path, PurePosixPath
 import posixpath
@@ -47,7 +47,7 @@ def collect_source():
     return result
 
 
-def validate(archive_path, kind):
+def validate(archive_path):
     with zipfile.ZipFile(archive_path) as archive:
         if archive.testzip() is not None:
             raise RuntimeError('ZIP integrity check failed')
@@ -57,20 +57,16 @@ def validate(archive_path, kind):
             assert not any(part.lower() in FORBIDDEN for part in parts), name
             assert 'back' not in parts, 'Previous backend folder: ' + name
             assert not any(part.startswith('.env') and part != '.env.example' for part in parts), name
-        if kind == 'db':
-            assert all(name in names for name in REQUIRED)
-            assert 'README.md' in names and 'reference/local-run.md' in names
-            assert sum(name.startswith('screenshots/') and name.endswith('.png') for name in names) == 19
-            assert not any(name.endswith('.java') or name.endswith('/pom.xml') or name.startswith(('src/', 'docs/', 'deliverables/')) for name in names)
-            for extension in ('.mwb',):
-                assert sum(name.endswith(extension) for name in names) == 1, 'Duplicate mandatory model'
-        else:
-            assert 'dbtrip/src/main/java/kr/co/enjoytrip/config/Database.java' in names
-            assert 'dbtrip/pom.xml' in names and 'dbtrip/README.md' in names
-            assert all('dbtrip/' + name in names for name in SOURCE_FILES)
-            assert not any(part in ('docs', 'deliverables', 'screenshots', 'reference') for name in names for part in PurePosixPath(name).parts)
-            assert not any(name.endswith('.mwb') or name.endswith('EnjoyTrip_db.sql') for name in names)
-        # Every packaged Markdown file must resolve its own local links, with no other ZIP required.
+        assert all(name in names for name in REQUIRED)
+        assert 'README.md' in names and 'reference/local-run.md' in names
+        assert sum(name.startswith('screenshots/') and name.endswith('.png') for name in names) == 19
+        assert sum(name.endswith('.mwb') for name in names) == 1, 'Duplicate model'
+        assert 'dbtrip/src/main/java/kr/co/enjoytrip/config/Database.java' in names
+        assert 'dbtrip/pom.xml' in names and 'dbtrip/README.md' in names
+        assert all('dbtrip/' + name in names for name in SOURCE_FILES)
+        assert not any(name.startswith(('src/', 'docs/', 'deliverables/')) for name in names)
+        assert not any(name.endswith('.java') and not name.startswith('dbtrip/src/') for name in names)
+        # Every packaged Markdown file must resolve its own local links within this ZIP.
         for name in names:
             if not name.endswith('.md'):
                 continue
@@ -83,7 +79,7 @@ def validate(archive_path, kind):
                 assert resolved in names or any(candidate.startswith(resolved.rstrip('/') + '/') for candidate in names), (name, target)
 
 
-def write_zip(destination, files, kind, secrets):
+def write_zip(destination, files, secrets):
     temporary = destination.with_suffix('.zip.tmp')
     try:
         with zipfile.ZipFile(temporary, 'w', zipfile.ZIP_DEFLATED, compresslevel=6) as archive:
@@ -92,7 +88,7 @@ def write_zip(destination, files, kind, secrets):
                 if any(secret in data for secret in secrets):
                     raise RuntimeError('Private setting found in submission candidate: ' + str(source.relative_to(ROOT)))
                 archive.writestr(name, data)
-        validate(temporary, kind)
+        validate(temporary)
         return temporary
     except Exception:
         temporary.unlink(missing_ok=True)
@@ -101,32 +97,27 @@ def write_zip(destination, files, kind, secrets):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--names', nargs=2, default=['개발자', '사용자'])
     parser.add_argument('--output-dir', type=Path, default=ROOT / 'submission/db-final')
     args = parser.parse_args()
-    names = sorted(args.names)
-    if any(not re.fullmatch(r'[가-힣]{2,10}', name) for name in names):
-        parser.error('Expected two Korean names')
-    basename = 'EnjoyTrip_db__' + '_'.join(names)
     folder = args.output_dir.resolve()
     folder.mkdir(parents=True, exist_ok=True)
     settings = load_settings()
     secrets = [value.encode('utf-8') for key, value in settings.items()
                if ('KEY' in key or 'PASSWORD' in key) and len(value) >= 12 and value != 'replace-me']
-    outputs = [(folder / (basename + '.zip'), collect_db(), 'db'),
-               (folder / (basename + '_소스코드.zip'), collect_source(), 'source')]
-    prepared = []
+    files = collect_db()
+    sources = collect_source()
+    if files.keys() & sources.keys():
+        raise RuntimeError('DB documentation and source paths overlap')
+    files.update(sources)
+    destination = folder / 'EnjoyTrip_db.zip'
+    temporary = write_zip(destination, files, secrets)
     try:
-        for destination, files, kind in outputs:
-            prepared.append((write_zip(destination, files, kind, secrets), destination))
-        for temporary, destination in prepared:
-            temporary.replace(destination)
-            print(f'Created: {destination.relative_to(ROOT)} ({destination.stat().st_size:,} bytes)')
+        temporary.replace(destination)
+        print(f'Created: {destination} ({destination.stat().st_size:,} bytes)')
     finally:
-        for temporary, _ in prepared:
-            temporary.unlink(missing_ok=True)
-    print('Verified: DB-only deliverables and runnable source are separate; all Markdown links resolve in each ZIP.')
-    print('Excluded from both: prior back folders, .git/bin, private env, runtime data and build output.')
+        temporary.unlink(missing_ok=True)
+    print('Verified: DB files, 19 screenshots and dbtrip source in one ZIP; all Markdown links resolve.')
+    print('Excluded: prior back folders, .git/bin, private env, runtime data and build output.')
 
 
 if __name__ == '__main__':

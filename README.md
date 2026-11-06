@@ -1,18 +1,14 @@
 # EnjoyTrip
 
-**DB 프로젝트 제출 프로젝트: `dbtrip` ·  개발자·사용자**
-
-[현재 실행 화면으로 보는 서비스 소개·필수 제출물](deliverables/db/README.md) · [제출 체크리스트](deliverables/db/submission-checklist.md)
+[실행 화면으로 보는 서비스 소개](deliverables/db/README.md) · [로컬 실행 안내](docs/db/06-local-test.md)
 
 ![EnjoyTrip 서비스 홈](deliverables/db/screenshots/01-home.png)
 
 Servlet/JSP·JDBC·MySQL로 구현한 공공데이터 기반 여행 서비스입니다. [백엔드 개발 문서](docs/back/README.md), [DB 확장 설계](docs/db/README.md), [현재 개발·검증 결과](docs/db/05-progress.md)를 참고하세요.
 
-## 제출용 산출물
+## 문서
 
-제출 압축은 **DB 산출물 ZIP**과 **소스코드 ZIP**을 별도로 만든다. 이전 `deliverables/back`·`docs/back`은 개발 저장소의 과거 기록으로만 보존하며 두 제출 ZIP에는 포함하지 않는다.
-
-[DB 산출물](deliverables/db/README.md)에 전체 12개 테이블 ERD·최종 DDL·실제 실행 화면·검증 결과를 정리했습니다. [기존 백엔드 산출물](deliverables/back/README.md)과 [기존 화면 캡처](deliverables/back/screenshots/README.md)는 이전 단계 기록입니다.
+[서비스 소개와 DB 설계](deliverables/db/README.md)에 전체 12개 테이블 ERD·최종 DDL·실행 화면·검증 결과를 정리했습니다. [백엔드 설계](docs/back/README.md)와 [DB 확장 설계](docs/db/README.md)에서 구조와 구현 범위를 확인할 수 있습니다.
 
 ## 요구 환경
 
@@ -22,7 +18,7 @@ Servlet/JSP·JDBC·MySQL로 구현한 공공데이터 기반 여행 서비스입
 
 ## 로컬 실행
 
-1. 제출 ZIP의 새 환경은 **`EnjoyTrip_db.sql` 하나로 DDL·기준정보·공개 관광지 데이터를 함께 준비**합니다. 개발용 DDL만 필요하면 `src/main/resources/schema.sql`과 `src/main/resources/db/seed/lookup-data.sql`을 차례로 실행합니다. 기존 DB는 백업·앱 중지 후 `src/main/resources/db/migrations/001-db-extension.sql`을 사용합니다. 기본 DB는 `enjoytrip`이며 [상세 안내](docs/db/06-local-test.md)를 참고하세요.
+1. 새 환경은 **`EnjoyTrip_db.sql` 하나로 DDL·기준정보·공개 관광지 데이터를 함께 준비**합니다. 개발용 DDL만 필요하면 `src/main/resources/schema.sql`과 `src/main/resources/db/seed/lookup-data.sql`을 차례로 실행합니다. 기존 DB는 백업·앱 중지 후 `src/main/resources/db/migrations/001-db-extension.sql`을 사용합니다. 기본 DB는 `enjoytrip`이며 [상세 안내](docs/db/06-local-test.md)를 참고하세요.
 2. [.env.example](.env.example)을 참고해 Git에서 제외되는 `.env`에 실제 값을 입력합니다. `replace-me`는 예시값이므로 실제 MySQL·관리자 비밀번호로 바꿉니다. 실제 비밀번호나 API 키를 커밋하지 않습니다.
 3. Windows는 `.\run-local.ps1`을 실행합니다. 스크립트가 Maven 빌드와 테스트를 수행하고 `.env`를 Tomcat 프로세스에 전달합니다. macOS/Linux는 `./mvnw clean package` 후 환경 변수를 설정한 Tomcat 11의 `webapps`에 `target/enjoytrip.war`를 배포합니다.
 4. `http://localhost:8080/enjoytrip/health`에서 `OK`를 확인한 다음 `/enjoytrip/`에서 홈을 엽니다. 다른 포트는 `.\run-local.ps1 -Port 18080`으로 시작합니다. 앱·DB 도구·HTTP 검증은 모두 루트 `.env` 하나를 사용하며, 별도 `app.env`나 `-EnvFile` 옵션은 사용하지 않습니다.

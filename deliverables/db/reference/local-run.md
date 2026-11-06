@@ -1,15 +1,19 @@
 # DB 산출물·소스코드 실행 안내
 
-제출 파일은 두 개다. DB 산출물 ZIP은 문서·필수 DB 파일·실행 화면을, 소스코드 ZIP은 실행 가능한 Maven 프로젝트만 담는다. 이전 백엔드 산출물은 어느 ZIP에도 포함하지 않는다.
+`EnjoyTrip_db.zip` 하나에 DB 자료와 실행 가능한 소스를 함께 제공한다.
 
-| 파일 | 내용 |
-| --- | --- |
-| EnjoyTrip_db.zip | README, MWB·SQL·ERD PNG, 현재 환경 캡처 19장, 검증·실행 안내 |
-| EnjoyTrip_source.zip | dbtrip/src, pom.xml, Maven Wrapper, 실행·테스트 스크립트, .env.example |
+```text
+EnjoyTrip_db.zip
+├── README.md
+├── EnjoyTrip_db.mwb / EnjoyTrip_db.sql / EnjoyTrip_db.png
+├── screenshots/         실행 화면 19장
+├── reference/           설정 예시·업그레이드·실행 안내
+└── dbtrip/              소스·Maven Wrapper·실행 및 테스트 스크립트
+```
 
 ## 새 환경 실행
 
-1. DB 산출물 ZIP과 소스코드 ZIP을 각각 압축 해제한다. 소스 폴더는 `dbtrip/`이다.
+1. ZIP을 압축 해제한다. DB 파일은 최상위에, 소스 폴더는 `dbtrip/`에 있다.
 2. Java 21 이상 JDK, MySQL 8, Tomcat 11을 준비하고 `JAVA_HOME`을 JDK 위치로 지정한다. 이번 검증 환경은 Java 25 JDK의 release 21, MySQL 8.0.46, Tomcat 11.0.26이었다.
 3. MySQL에서 **새 빈 DB용** `EnjoyTrip_db.sql`을 실행한다. 앱 테이블 12개·기준정보·공개 관광지 51,622건을 준비하며 실제 회원·관리자·개인 콘텐츠는 포함하지 않는다.
 4. 소스 폴더의 `.env.example`을 `.env`로 복사하고 DB 접속·관리자 계정·업로드 폴더·사용할 API 키를 설정한다. 참고용 [설정 예시](.env.example)는 실제 비밀번호를 포함하지 않는다.

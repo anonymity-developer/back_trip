@@ -6,6 +6,16 @@ import re
 
 
 def prepare(schema: str, dump: str) -> str:
+    source = re.search(r'CREATE SCHEMA IF NOT EXISTS `([A-Za-z0-9_]+)`', schema)
+    if not source or not re.search(r'^USE ' + re.escape(source.group(1)) + r';', dump, re.MULTILINE):
+        raise ValueError('Expected matching source schema and dump database names.')
+    # Normalize the loader's staging schema without changing the supplied files.
+    schema = schema.replace('`' + source.group(1) + '`', '`trip_source`')
+    dump = dump.replace('`' + source.group(1) + '`', '`trip_source`')
+    dump = re.sub(r'^USE ' + re.escape(source.group(1)) + r';', 'USE trip_source;', dump, flags=re.MULTILINE)
+    # Generated SQL does not need source-specific export header comments.
+    schema = re.sub(r'^--[^\n]*(?:\n|$)', '', schema, flags=re.MULTILINE)
+    dump = re.sub(r'^--[^\n]*(?:\n|$)', '', dump, flags=re.MULTILINE)
     schema = schema.replace('CREATE SCHEMA IF NOT EXISTS `trip_source`', 'CREATE SCHEMA `trip_source`')
     schema = re.sub(r'^DROP TABLE IF EXISTS .*?;\s*$', '', schema, flags=re.MULTILINE)
     schema = schema.replace(
@@ -31,13 +41,16 @@ def prepare(schema: str, dump: str) -> str:
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--source-dir', type=Path, default=Path('temp'))
+    parser.add_argument('--schema-file', type=Path, help='Source DDL; defaults to source-dir/trip-schema.sql')
+    parser.add_argument('--dump-file', type=Path, help='Source data; defaults to source-dir/trip-dump.sql')
     parser.add_argument('--output', type=Path, default=Path('target/db/source.sql'))
     args = parser.parse_args()
-    paths = [args.source_dir / name for name in ('trip-schema.sql', 'trip-dump.sql')]
+    paths = [args.schema_file or args.source_dir / 'trip-schema.sql',
+             args.dump_file or args.source_dir / 'trip-dump.sql']
     inputs = [p.read_bytes() for p in paths]
     result = prepare(*(data.decode('utf-8-sig') for data in inputs))
-    hashes = ''.join(f'-- SHA256 {p.name}: {hashlib.sha256(data).hexdigest()}\n'
-                     for p, data in zip(paths, inputs))
+    hashes = ''.join(f'-- SHA256 source-{index}: {hashlib.sha256(data).hexdigest()}\n'
+                     for index, data in enumerate(inputs, 1))
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(hashes + result, encoding='utf-8')
     print(f'Generated {args.output}; originals unchanged. Target schema: trip_source (new only).')

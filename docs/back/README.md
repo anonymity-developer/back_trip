@@ -1,6 +1,6 @@
 # EnjoyTrip 개발 문서
 
-`temp/자바전공_enjoytrip_16_05_백엔드.pdf`의 요구사항과 이번 프로젝트에서 확정한 구현 범위를 정리한 문서입니다. `temp/`는 Git에서 제외합니다.
+`temp/backend-requirements.pdf`의 요구사항과 이번 프로젝트에서 확정한 구현 범위를 정리한 문서입니다. `temp/`는 Git에서 제외합니다.
 
 | 문서 | 내용 |
 | --- | --- |
